@@ -4,8 +4,8 @@ using System.Text;
 
 namespace Myitian.LiteProtobuf.Nodes;
 
-public class ProtobufLengthDelimited()
-    : ProtobufNode(WireType.LengthDelimited), IProtobufType<ProtobufLengthDelimited>
+public class ProtobufByteArray()
+    : ProtobufNode(WireType.LengthDelimited), IProtobufType<ProtobufByteArray>
 {
     public byte[]? Data { get; set; }
     public override ProtobufNode Expand(int recursion = -1)
@@ -42,7 +42,7 @@ public class ProtobufLengthDelimited()
             }
         }
     }
-    public static bool TryCreateInstance(WireType wireType, [NotNullWhen(true)] out ProtobufLengthDelimited? value)
+    public static bool TryCreateInstance(WireType wireType, [NotNullWhen(true)] out ProtobufByteArray? value)
     {
         if (wireType is not WireType.LengthDelimited)
         {
@@ -52,7 +52,7 @@ public class ProtobufLengthDelimited()
         value = new();
         return true;
     }
-    public static bool TryCreateFulfilled<TReader>(scoped ref TReader reader, WireType wireType, [NotNullWhen(true)] out ProtobufLengthDelimited? value, out ParseStatus status)
+    public static bool TryCreateFulfilled<TReader>(scoped ref TReader reader, WireType wireType, [NotNullWhen(true)] out ProtobufByteArray? value, out ParseStatus status)
         where TReader : IBinaryReader<TReader>, allows ref struct
     {
         if (!TryCreateInstance(wireType, out value))
@@ -165,7 +165,7 @@ public class ProtobufLengthDelimited()
                     return null;
                 if (!child.TryReadProtobuf(ref reader, childWireType, out _))
                     return null;
-                if (recursion != 0 && child is ProtobufLengthDelimited childLD)
+                if (recursion != 0 && child is ProtobufByteArray childLD)
                 {
                     ProtobufMessage? childMSG = childLD.AsMessage(nextRecursion);
                     if (childMSG is not null)

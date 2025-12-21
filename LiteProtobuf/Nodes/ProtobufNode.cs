@@ -14,7 +14,7 @@ public abstract class ProtobufNode(WireType type)
     }
     public static bool TryCreateInstance(WireType wireType, [NotNullWhen(true)] out ProtobufNode? value)
     {
-        if (ProtobufLengthDelimited.TryCreateInstance(wireType, out ProtobufLengthDelimited? v1))
+        if (ProtobufByteArray.TryCreateInstance(wireType, out ProtobufByteArray? v1))
         {
             value = v1;
             return true;
