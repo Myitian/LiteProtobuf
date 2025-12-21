@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="LiteProtobuf/LiteProtobuf.csproj" />
+  <Project Path="LiteProtobuf.CompileTimeSourceGeneration/LiteProtobuf.CompileTimeSourceGeneration.csproj" />
+  <Project Path="LiteProtobuf.SourceGeneration/LiteProtobuf.SourceGeneration.csproj" />
+  <Project Path="LiteProtobuf.Example/LiteProtobuf.Example.csproj" />
+</Solution>

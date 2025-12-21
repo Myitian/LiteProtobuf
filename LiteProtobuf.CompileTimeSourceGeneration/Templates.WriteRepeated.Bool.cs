@@ -1,0 +1,59 @@
+namespace Myitian.LiteProtobuf.CompileTimeSourceGeneration;
+
+public partial class Templates
+{
+    public partial class WriteRepeated
+    {
+        public class Bool : IType
+        {
+            public static readonly Bool Instance = new();
+
+            public string Keyword => nameof(Bool);
+            public string ReadOnlySpan => """
+                    {{
+                        switch (repeatedEncoding)
+                        {{
+                            case RepeatedEncoding.Auto:
+                            case RepeatedEncoding.Packed:
+                                WriteTag(ref writer, index, WireType.LengthDelimited);
+                                writer.WriteVarInt(value.Length);
+                
+                """;
+            public string IEnumerable => """
+                    {{
+                        int count = -1;
+                        switch (repeatedEncoding)
+                        {{
+                            case RepeatedEncoding.Auto:
+                                if (value.TryGetNonEnumeratedCount(out count))
+                                    goto case RepeatedEncoding.Packed;
+                                else
+                                    goto case RepeatedEncoding.NonPacked;
+                            case RepeatedEncoding.Packed when count < 0:
+                                count = value.Count();
+                                goto case RepeatedEncoding.Packed;
+                            case RepeatedEncoding.Packed:
+                                WriteTag(ref writer, index, WireType.LengthDelimited);
+                                writer.WriteVarInt(count);
+                
+                """;
+            public string Common => """
+                                foreach ({0} it in value)
+                                    writer.Write{1}(it);
+                                break;
+                            case RepeatedEncoding.NonPacked:
+                                foreach ({0} it in value)
+                                {{
+                                    WriteTag(ref writer, index, WireType.VarInt);
+                                    writer.Write{1}(it);
+                                }}
+                                break;
+                            default:
+                                throw new ArgumentException("Invalid repeatedEncoding", nameof(repeatedEncoding));
+                        }}
+                    }}
+                
+                """;
+        }
+    }
+}

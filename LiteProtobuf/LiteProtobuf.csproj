@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsAotCompatible>true</IsAotCompatible>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <LangVersion>latest</LangVersion>
+    <Authors>Myitian</Authors>
+    <RootNamespace>$(Authors).$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+    <AssemblyName>$(Authors).$(MSBuildProjectName)</AssemblyName>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\LiteProtobuf.CompileTimeSourceGeneration\LiteProtobuf.CompileTimeSourceGeneration.csproj" PrivateAssets="all" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\LiteProtobuf.SourceGeneration\LiteProtobuf.SourceGeneration.csproj" ReferenceOutputAssembly="false" PackAsAnalyzer="true" />
+  </ItemGroup>
+
+</Project>
