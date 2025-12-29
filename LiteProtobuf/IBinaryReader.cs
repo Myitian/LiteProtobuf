@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Myitian.LiteProtobuf;
 
-#pragma warning disable IDE0002,IDE0003 // to simplify source generator
+#pragma warning disable IDE0002,IDE0003 // keep `this.` and `IBinaryReader.` to simplify the source generator
 [ShadowVirtualMethodBodyTo(typeof(BinaryReaderExtension), "TReader", "reader")]
 public interface IBinaryReader : IDisposable
 {
@@ -167,11 +167,17 @@ public interface IBinaryReader : IDisposable
     string ReadString(Encoding? encoding = null);
 }
 #pragma warning restore IDE0002,IDE0003
-public interface IBinaryReader<TReader> : IBinaryReader
-    where TReader : IBinaryReader<TReader>, allows ref struct
+public interface IStructBinaryReader<TReader> : IBinaryReader
+    where TReader : struct, IStructBinaryReader<TReader>, allows ref struct
 {
     public static abstract TReader CreateLengthDelimitedReader(ref TReader parent);
-    public static abstract bool TryCreateLengthDelimitedReader(ref TReader parent, [NotNullWhen(true)] out TReader? subReader, out ParseStatus status);
+    public static abstract bool TryCreateLengthDelimitedReader(ref TReader parent, [NotNullWhen(true)] out TReader subReader, out ParseStatus status);
+}
+public interface IClassBinaryReader<TReader> : IBinaryReader
+    where TReader : class, IClassBinaryReader<TReader>
+{
+    public static abstract TReader CreateLengthDelimitedReader(TReader parent);
+    public static abstract bool TryCreateLengthDelimitedReader(TReader parent, [NotNullWhen(true)] out TReader? subReader, out ParseStatus status);
 }
 public static partial class BinaryReaderExtension
 {

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Myitian.LiteProtobuf;
 
-public ref struct SpanBinaryWriter(Span<byte> bytes) : IBinaryWriter<SpanBinaryWriter>
+public ref struct SpanBinaryWriter(Span<byte> bytes) : IStructBinaryWriter<SpanBinaryWriter>
 {
     private readonly ref int _parentPosition = ref Unsafe.NullRef<int>();
     private int _position = 0;

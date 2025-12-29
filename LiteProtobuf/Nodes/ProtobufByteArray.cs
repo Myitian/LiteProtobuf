@@ -1,10 +1,12 @@
 ﻿using Myitian.LiteProtobuf.Serialization;
+using Myitian.LiteProtobuf.SourceGeneration;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace Myitian.LiteProtobuf.Nodes;
 
-public class ProtobufByteArray()
+[DefaultTryCreateFulfilled(typeof(ProtobufByteArray))]
+public partial class ProtobufByteArray()
     : ProtobufNode(WireType.LengthDelimited), IProtobufType<ProtobufByteArray>
 {
     public byte[]? Data { get; set; }
@@ -22,7 +24,7 @@ public class ProtobufByteArray()
             {
                 ParseStatus subStatus;
                 int nextRecursion = Math.Max(recursion, 0) - 1;
-                while (ProtobufUtility.TryReadTag(ref reader, out int index, out WireType childWireType, out subStatus))
+                while (reader.TryReadTag(out int index, out WireType childWireType, out subStatus))
                 {
                     if (!TryCreateInstance(childWireType, out ProtobufNode? child))
                         return null;
@@ -52,17 +54,7 @@ public class ProtobufByteArray()
         value = new();
         return true;
     }
-    public static bool TryCreateFulfilled<TReader>(scoped ref TReader reader, WireType wireType, [NotNullWhen(true)] out ProtobufByteArray? value, out ParseStatus status)
-        where TReader : IBinaryReader<TReader>, allows ref struct
-    {
-        if (!TryCreateInstance(wireType, out value))
-        {
-            status = ParseStatus.InvalidData;
-            return false;
-        }
-        return value.TryReadProtobuf(ref reader, wireType, out status);
-    }
-    public override bool TryReadProtobuf<TReader>(ref TReader reader, WireType receivedWireType, out ParseStatus status)
+    protected override bool SharedTryReadProtobuf<TReader>(ref TReader reader, WireType receivedWireType, out ParseStatus status)
     {
         if (receivedWireType is not WireType.LengthDelimited)
         {
@@ -81,7 +73,7 @@ public class ProtobufByteArray()
             return false;
         }
     }
-    public override void ReadProtobuf<TReader>(ref TReader reader, WireType receivedWireType)
+    protected override void SharedReadProtobuf<TReader>(ref TReader reader, WireType receivedWireType)
     {
         if (receivedWireType is not WireType.LengthDelimited)
             throw new InvalidDataException();
@@ -89,23 +81,26 @@ public class ProtobufByteArray()
     }
     public override void WriteProtobuf<TWriter>(ref TWriter writer, int index)
     {
-        ProtobufUtility.WriteTag(ref writer, index, WireType.LengthDelimited);
+        writer.WriteTag(index, WireType.LengthDelimited);
+        writer.WriteLengthDelimited(Data);
+    }
+    public override void WriteProtobuf<TWriter>(TWriter writer, int index)
+    {
+        writer.WriteTag(index, WireType.LengthDelimited);
         writer.WriteLengthDelimited(Data);
     }
     public override string ToString()
     {
-        return $"{{LengthDelimited, Length = {Data?.Length ?? 0}, {LimitedBytes(Data, 32)}}}";
+        return $"{{LengthDelimited, Length = {Data?.Length ?? 0}, {DisplayLimitedBytes(Data, 32)}}}";
     }
-    public static string LimitedBytes(ReadOnlySpan<byte> bytes, int limit)
+    public static string DisplayLimitedBytes(ReadOnlySpan<byte> bytes, int limit)
     {
         StringBuilder sb = new();
         sb.Append("b\"");
         for (int i = 0; i < bytes.Length; i++)
         {
             if (i == limit)
-            {
                 return sb.Append($"\" ... and {bytes.Length - limit} more").ToString();
-            }
             byte b = bytes[i];
             switch (b)
             {
@@ -125,14 +120,10 @@ public class ProtobufByteArray()
                     sb.Append("\\\\");
                     break;
                 default:
-                    if (0x1F < b && b < 0x7F)
-                    {
+                    if (b is > 0x1F and < 0x7F)
                         sb.Append((char)b);
-                    }
                     else
-                    {
                         sb.Append($"\\x{b:X2}");
-                    }
                     break;
             }
         }

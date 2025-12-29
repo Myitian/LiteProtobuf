@@ -1,10 +1,12 @@
 ﻿using Myitian.LiteProtobuf.Serialization;
+using Myitian.LiteProtobuf.SourceGeneration;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace Myitian.LiteProtobuf.Nodes;
 
-public sealed class ProtobufMessage()
+[DefaultTryCreateFulfilled(typeof(ProtobufMessage))]
+public sealed partial class ProtobufMessage()
     : ProtobufNode(WireType.LengthDelimited), IProtobufType<ProtobufMessage>
 {
     public List<KeyValuePair<int, ProtobufNode>> Children { get; } = [];
@@ -35,17 +37,10 @@ public sealed class ProtobufMessage()
         value = new();
         return true;
     }
-    public static bool TryCreateFulfilled<TReader>(scoped ref TReader reader, WireType wireType, [NotNullWhen(true)] out ProtobufMessage? value, out ParseStatus status)
-        where TReader : IBinaryReader<TReader>, allows ref struct
-    {
-        if (!TryCreateInstance(wireType, out value))
-        {
-            status = ParseStatus.InvalidData;
-            return false;
-        }
-        return value.TryReadProtobuf(ref reader, wireType, out status);
-    }
-
+    protected override bool SharedTryReadProtobuf<TReader>(ref TReader reader, WireType receivedWireType, out ParseStatus status)
+        => throw new NotSupportedException();
+    protected override void SharedReadProtobuf<TReader>(ref TReader reader, WireType receivedWireType)
+        => throw new NotSupportedException();
     public override bool TryReadProtobuf<TReader>(ref TReader reader, WireType receivedWireType, out ParseStatus status)
     {
         if (receivedWireType is not WireType.LengthDelimited)
@@ -53,16 +48,16 @@ public sealed class ProtobufMessage()
             status = ParseStatus.InvalidData;
             return false;
         }
-        if (!TReader.TryCreateLengthDelimitedReader(ref reader, out TReader? subReader, out status))
+        if (!TReader.TryCreateLengthDelimitedReader(ref reader, out TReader subReader, out status))
         {
-            subReader?.Dispose();
+            subReader.Dispose();
             return false;
         }
         try
         {
             Children.Clear();
             ParseStatus subStatus;
-            while (ProtobufUtility.TryReadTag(ref subReader, out int index, out WireType childWireType, out subStatus))
+            while (subReader.TryReadTag(out int index, out WireType childWireType, out subStatus))
             {
                 if (!TryCreateInstance(childWireType, out ProtobufNode? child)
                     || !child.TryReadProtobuf(ref subReader, childWireType, out subStatus))
@@ -77,29 +72,65 @@ public sealed class ProtobufMessage()
         }
         finally
         {
+            subReader.Dispose();
+        }
+    }
+    public override bool TryReadProtobuf<TReader>(TReader reader, WireType receivedWireType, out ParseStatus status)
+    {
+        if (receivedWireType is not WireType.LengthDelimited)
+        {
+            status = ParseStatus.InvalidData;
+            return false;
+        }
+        if (!TReader.TryCreateLengthDelimitedReader(reader, out TReader? subReader, out status))
+        {
             subReader?.Dispose();
+            return false;
+        }
+        using (subReader)
+        {
+            Children.Clear();
+            ParseStatus subStatus;
+            while (subReader.TryReadTag(out int index, out WireType childWireType, out subStatus))
+            {
+                if (!TryCreateInstance(childWireType, out ProtobufNode? child)
+                    || !child.TryReadProtobuf(subReader, childWireType, out subStatus))
+                {
+                    status = ParseStatus.InvalidData;
+                    return false;
+                }
+                Children.Add(new(index, child));
+            }
+            status = subStatus == ParseStatus.ExactEndOfStream ? ParseStatus.Success : ParseStatus.InvalidData;
+            return true;
         }
     }
     public override void ReadProtobuf<TReader>(ref TReader reader, WireType receivedWireType)
     {
         if (receivedWireType is not WireType.LengthDelimited)
             throw new InvalidDataException();
-        TReader? subReader = TReader.CreateLengthDelimitedReader(ref reader);
+        TReader subReader = TReader.CreateLengthDelimitedReader(ref reader);
         try
         {
             ReadProtobufBody(ref subReader);
         }
         finally
         {
-            subReader?.Dispose();
+            subReader.Dispose();
         }
     }
-
+    public override void ReadProtobuf<TReader>(TReader reader, WireType receivedWireType)
+    {
+        if (receivedWireType is not WireType.LengthDelimited)
+            throw new InvalidDataException();
+        using TReader subReader = TReader.CreateLengthDelimitedReader(reader);
+        ReadProtobufBody(subReader);
+    }
     public void ReadProtobufBody<TReader>(ref TReader subReader)
-        where TReader : IBinaryReader<TReader>, allows ref struct
+        where TReader : struct, IStructBinaryReader<TReader>, allows ref struct
     {
         ParseStatus subStatus;
-        while (ProtobufUtility.TryReadTag(ref subReader, out int index, out WireType childWireType, out subStatus))
+        while (subReader.TryReadTag(out int index, out WireType childWireType, out subStatus))
         {
             if (!TryCreateInstance(childWireType, out ProtobufNode? child))
                 throw new InvalidDataException($"Invalid wire type: {childWireType}");
@@ -110,9 +141,23 @@ public sealed class ProtobufMessage()
             throw new InvalidDataException();
     }
 
+    public void ReadProtobufBody<TReader>(TReader subReader)
+        where TReader : class, IClassBinaryReader<TReader>
+    {
+        ParseStatus subStatus;
+        while (subReader.TryReadTag(out int index, out WireType childWireType, out subStatus))
+        {
+            if (!TryCreateInstance(childWireType, out ProtobufNode? child))
+                throw new InvalidDataException($"Invalid wire type: {childWireType}");
+            child.ReadProtobuf(subReader, childWireType);
+            Children.Add(new(index, child));
+        }
+        if (subStatus != ParseStatus.ExactEndOfStream)
+            throw new InvalidDataException();
+    }
     public override void WriteProtobuf<TWriter>(ref TWriter writer, int index)
     {
-        ProtobufUtility.WriteTag(ref writer, index, Type);
+        writer.WriteTag(index, Type);
         TWriter subWriter = TWriter.CreateLengthDelimitedWriter(ref writer);
         try
         {
@@ -120,15 +165,26 @@ public sealed class ProtobufMessage()
         }
         finally
         {
-            subWriter?.Dispose();
+            subWriter.Dispose();
         }
     }
-
+    public override void WriteProtobuf<TWriter>(TWriter writer, int index)
+    {
+        writer.WriteTag(index, Type);
+        using TWriter subWriter = TWriter.CreateLengthDelimitedWriter(writer);
+        WriteProtobufBody(subWriter);
+    }
     public void WriteProtobufBody<TWriter>(ref TWriter writer)
-        where TWriter : IBinaryWriter<TWriter>, allows ref struct
+        where TWriter : struct, IStructBinaryWriter<TWriter>, allows ref struct
     {
         foreach ((int i, ProtobufNode node) in Children)
             node.WriteProtobuf(ref writer, i);
+    }
+    public void WriteProtobufBody<TWriter>(TWriter writer)
+        where TWriter : class, IClassBinaryWriter<TWriter>
+    {
+        foreach ((int i, ProtobufNode node) in Children)
+            node.WriteProtobuf(writer, i);
     }
 
     public override string ToString()

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Myitian.LiteProtobuf;
 
-public class StreamBinaryWriter(Stream stream, bool leaveOpen = false) : IBinaryWriter<StreamBinaryWriter>
+public class StreamBinaryWriter(Stream stream, bool leaveOpen = false) : IClassBinaryWriter<StreamBinaryWriter>
 {
     protected readonly StreamBinaryWriter? _parent;
     public Stream BaseStream { get; } = stream;
@@ -101,7 +101,7 @@ public class StreamBinaryWriter(Stream stream, bool leaveOpen = false) : IBinary
         GC.SuppressFinalize(this);
     }
 
-    public static StreamBinaryWriter CreateLengthDelimitedWriter(ref StreamBinaryWriter parent)
+    public static StreamBinaryWriter CreateLengthDelimitedWriter(StreamBinaryWriter parent)
     {
         return new(parent);
     }

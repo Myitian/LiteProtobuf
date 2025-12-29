@@ -15,7 +15,7 @@ public partial class Templates
                         {{
                             case RepeatedEncoding.Auto:
                             case RepeatedEncoding.Packed:
-                                long totalSize = value.Length * ({2}L / 8);
+                                long totalSize = value.Length * ({3}L / 8);
                 
                 """;
             public string IEnumerable => """
@@ -32,20 +32,20 @@ public partial class Templates
                                 count = value.Count();
                                 goto case RepeatedEncoding.Packed;
                             case RepeatedEncoding.Packed:
-                                long totalSize = count * ({2}L / 8);
+                                long totalSize = count * ({3}L / 8);
                 
                 """;
             public string Common => """
-                                WriteTag(ref writer, index, WireType.LengthDelimited);
+                                WriteTag({0}writer, index, WireType.LengthDelimited);
                                 writer.WriteVarInt(totalSize);
-                                foreach ({0} it in value)
-                                    writer.Write{1}(it);
+                                foreach ({1} it in value)
+                                    writer.Write{2}(it);
                                 break;
                             case RepeatedEncoding.NonPacked:
-                                foreach ({0} it in value)
+                                foreach ({1} it in value)
                                 {{
-                                    WriteTag(ref writer, index, WireType.{1});
-                                    writer.Write{1}(it);
+                                    WriteTag({0}writer, index, WireType.{2});
+                                    writer.Write{2}(it);
                                 }}
                                 break;
                             default:

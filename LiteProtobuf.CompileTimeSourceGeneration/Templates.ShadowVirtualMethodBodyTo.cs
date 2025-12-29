@@ -20,8 +20,10 @@ public partial class Templates
             {
                 string? u = model.Self.ContainingNamespace?.ToDisplayString();
                 if (!string.IsNullOrEmpty(u))
-                    us = $@"using {u};
-{us}";
+                    us = $"""
+                        using {u};
+                        {us}
+                        """;
             }
             int depth = UtilityGenerator.CreateCSharpCode(sb, us, model.Target);
             foreach (IMethodSymbol m in model.Self

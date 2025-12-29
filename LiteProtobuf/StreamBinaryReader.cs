@@ -3,7 +3,7 @@ using System.Text;
 
 namespace Myitian.LiteProtobuf;
 
-public class StreamBinaryReader(Stream stream, bool leaveOpen = false) : IBinaryReader<StreamBinaryReader>
+public class StreamBinaryReader(Stream stream, bool leaveOpen = false) : IClassBinaryReader<StreamBinaryReader>
 {
     protected readonly StreamBinaryReader? _parent;
     protected long _length = long.MaxValue;
@@ -142,7 +142,7 @@ public class StreamBinaryReader(Stream stream, bool leaveOpen = false) : IBinary
     public string ReadString(Encoding? encoding = null)
     {
         StreamBinaryReader self = this;
-        using StreamBinaryReader subReader = CreateLengthDelimitedReader(ref self);
+        using StreamBinaryReader subReader = CreateLengthDelimitedReader(self);
         using StreamReader reader = new(subReader.BaseStream, encoding ?? ProtobufUtility.DefaultEncoding);
         return reader.ReadToEnd();
     }
@@ -155,13 +155,13 @@ public class StreamBinaryReader(Stream stream, bool leaveOpen = false) : IBinary
         GC.SuppressFinalize(this);
     }
 
-    public static StreamBinaryReader CreateLengthDelimitedReader(ref StreamBinaryReader parent)
+    public static StreamBinaryReader CreateLengthDelimitedReader(StreamBinaryReader parent)
     {
         long length = ((IBinaryReader)parent).ReadVarInt<long>();
         LengthLimitedStream limitedStream = new(parent.BaseStream, length, true);
         return new(limitedStream, false);
     }
-    public static bool TryCreateLengthDelimitedReader(ref StreamBinaryReader parent, [NotNullWhen(true)] out StreamBinaryReader? subReader, out ParseStatus status)
+    public static bool TryCreateLengthDelimitedReader(StreamBinaryReader parent, [NotNullWhen(true)] out StreamBinaryReader? subReader, out ParseStatus status)
     {
         if (((IBinaryReader)parent).TryReadVarInt(out long length, out status))
         {

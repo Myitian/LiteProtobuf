@@ -21,7 +21,7 @@ public partial class Templates
                         switch (repeatedEncoding)
                         {{
                             case Myitian.LiteProtobuf.RepeatedEncoding.Auto:
-                                if (value is ICollection<{0}>)
+                                if (value is ICollection<{1}>)
                                     goto case RepeatedEncoding.Packed;
                                 else
                                     goto case RepeatedEncoding.NonPacked;
@@ -29,17 +29,17 @@ public partial class Templates
                 """;
             public string Common => """
                             case RepeatedEncoding.Packed:
-                                long totalSize = Count{1}Size(value);
-                                WriteTag(ref writer, index, WireType.LengthDelimited);
+                                long totalSize = Count{2}Size(value);
+                                WriteTag({0}writer, index, WireType.LengthDelimited);
                                 writer.WriteVarInt(totalSize);
-                                foreach ({0} it in value)
-                                    writer.Write{1}(it);
+                                foreach ({1} it in value)
+                                    writer.Write{2}(it);
                                 break;
                             case RepeatedEncoding.NonPacked:
-                                foreach ({0} it in value)
+                                foreach ({1} it in value)
                                 {{
-                                    WriteTag(ref writer, index, WireType.VarInt);
-                                    writer.Write{1}(it);
+                                    WriteTag({0}writer, index, WireType.VarInt);
+                                    writer.Write{2}(it);
                                 }}
                                 break;
                             default:

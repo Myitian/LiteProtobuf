@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Myitian.LiteProtobuf;
 
-public ref struct SpanBinaryReader(ReadOnlySpan<byte> bytes) : IBinaryReader<SpanBinaryReader>
+public ref struct SpanBinaryReader(ReadOnlySpan<byte> bytes) : IStructBinaryReader<SpanBinaryReader>
 {
     public ReadOnlySpan<byte> Span { get; } = bytes;
     public int Position { get; set; }

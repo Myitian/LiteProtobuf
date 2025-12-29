@@ -11,11 +11,14 @@ public partial class Templates
         public static void Apply(SourceProductionContext context, Model model)
         {
             StringBuilder sb = new();
-            sb.AppendLine(Header).Append(' ', 4).AppendLine(model.Sign);
+            sb.AppendLine(ProtobufUtilityHeader).Append(' ', 4).AppendLine(model.Sign);
             string wireType = model.Mode == "VarIntZigZag" ? "VarInt" : model.Mode;
-            sb.AppendFormat(Common, model.Mode, wireType);
-            string code = sb.Append(Footer).ToString();
-            context.AddSource($"ProtobufUtility.{model.Name}.g.cs", code);
+            sb.AppendFormat(Common,
+                model.Mode, wireType,
+                model.IsValueType ? "ref " : "",
+                model.IsValueType ? "" : "?");
+            string code = sb.Append(ProtobufUtilityFooter).ToString();
+            context.AddSource($"ProtobufUtility.{model.Name}.{(model.IsValueType ? 'V' : 'C')}.g.cs", code);
         }
 
         public const string Common = """
@@ -28,9 +31,9 @@ public partial class Templates
                             destination.Add(value);
                             return true;
                         case WireType.LengthDelimited:
-                            if (!TReader.TryCreateLengthDelimitedReader(ref reader, out TReader? subReader, out status))
+                            if (!TReader.TryCreateLengthDelimitedReader({2}reader, out TReader{3} subReader, out status))
                             {{
-                                subReader?.Dispose();
+                                subReader{3}.Dispose();
                                 return false;
                             }}
                             using (subReader)
@@ -56,23 +59,29 @@ public partial class Templates
             public string Mode { get; } = "";
             public string Name { get; } = "";
             public string Sign { get; } = "";
+            public bool IsValueType { get; } = false;
 
             public Model(GeneratorAttributeSyntaxContext context)
             {
                 if (context.TargetNode is not MethodDeclarationSyntax m
                     || context.Attributes is not [
+                    {
+                        ConstructorArguments: [
                         {
-                            ConstructorArguments: [
-                                {
-                                    Kind: not TypedConstantKind.Array,
-                                    Value: string mode
-                                }]
-                        }])
+                            Kind: TypedConstantKind.Primitive,
+                            Value: string mode
+                        },
+                        {
+                            Kind: TypedConstantKind.Primitive,
+                            Value: bool isValueType
+                        }]
+                    }])
                     return;
 
                 Mode = mode;
                 Name = m.Identifier.Text;
                 Sign = SemicolonRemover.Instance.Visit(m).ToString();
+                IsValueType = isValueType;
                 IsValid = true;
             }
         }

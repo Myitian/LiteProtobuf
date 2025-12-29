@@ -28,11 +28,7 @@ class Program
                 Console.WriteLine(ex);
             }
             root = (ProtobufMessage)root.Expand();
-            // prevent `using` and `ref` limitations.
-            // This API won't replace the ref value, so it's ok to make a copy for the object reference variable.
-            // PS: Do not copy struct value!
-            StreamBinaryWriter w = writer;
-            root.WriteProtobufBody(ref w);
+            root.WriteProtobufBody(writer);
 
             // If parsed correctly, the input and output should be consistent.
 

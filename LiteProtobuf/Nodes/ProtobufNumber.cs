@@ -1,9 +1,11 @@
 ﻿using Myitian.LiteProtobuf.Serialization;
+using Myitian.LiteProtobuf.SourceGeneration;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Myitian.LiteProtobuf.Nodes;
 
-public sealed class ProtobufNumber(WireType type, ulong value)
+[DefaultTryCreateFulfilled(typeof(ProtobufNumber))]
+public sealed partial class ProtobufNumber(WireType type, ulong value)
     : ProtobufNode(type), IProtobufType<ProtobufNumber>
 {
     public ulong Value { get; set; } = value;
@@ -17,17 +19,7 @@ public sealed class ProtobufNumber(WireType type, ulong value)
         value = new(wireType, 0);
         return true;
     }
-    public static bool TryCreateFulfilled<TReader>(scoped ref TReader reader, WireType wireType, [NotNullWhen(true)] out ProtobufNumber? value, out ParseStatus status)
-        where TReader : IBinaryReader<TReader>, allows ref struct
-    {
-        if (!TryCreateInstance(wireType, out value))
-        {
-            status = ParseStatus.InvalidData;
-            return false;
-        }
-        return value.TryReadProtobuf(ref reader, wireType, out status);
-    }
-    public override bool TryReadProtobuf<TReader>(ref TReader reader, WireType receivedWireType, out ParseStatus status)
+    protected override bool SharedTryReadProtobuf<TReader>(ref TReader reader, WireType receivedWireType, out ParseStatus status)
     {
         if (receivedWireType != Type)
         {
@@ -50,26 +42,19 @@ public sealed class ProtobufNumber(WireType type, ulong value)
                 return false;
         }
     }
-    public override void ReadProtobuf<TReader>(ref TReader reader, WireType receivedWireType)
+    protected override void SharedReadProtobuf<TReader>(ref TReader reader, WireType receivedWireType)
     {
-        switch (receivedWireType)
+        Value = receivedWireType switch
         {
-            case WireType.VarInt:
-                Value = reader.ReadVarInt<ulong>();
-                break;
-            case WireType.Fixed64:
-                Value = reader.ReadFixed64<ulong>();
-                break;
-            case WireType.Fixed32:
-                Value = reader.ReadFixed32<uint>();
-                break;
-            default:
-                throw new InvalidDataException();
-        }
+            WireType.VarInt => reader.ReadVarInt<ulong>(),
+            WireType.Fixed64 => reader.ReadFixed64<ulong>(),
+            WireType.Fixed32 => reader.ReadFixed32<uint>(),
+            _ => throw new InvalidDataException(),
+        };
     }
-    public override void WriteProtobuf<TWriter>(ref TWriter writer, int index)
+    private void SharedWriteProtobuf<TWriter>(ref TWriter writer, int index)
+         where TWriter : IBinaryWriter, allows ref struct
     {
-        ProtobufUtility.WriteTag(ref writer, index, Type);
         switch (Type)
         {
             case WireType.VarInt:
@@ -84,6 +69,16 @@ public sealed class ProtobufNumber(WireType type, ulong value)
             default:
                 throw new NotSupportedException();
         }
+    }
+    public override void WriteProtobuf<TWriter>(ref TWriter writer, int index)
+    {
+        writer.WriteTag(index, Type);
+        SharedWriteProtobuf(ref writer, index);
+    }
+    public override void WriteProtobuf<TWriter>(TWriter writer, int index)
+    {
+        writer.WriteTag(index, Type);
+        SharedWriteProtobuf(ref writer, index);
     }
     public override string ToString()
     {

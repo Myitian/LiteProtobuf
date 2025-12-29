@@ -11,11 +11,15 @@
     <Authors>Myitian</Authors>
     <RootNamespace>$(Authors).$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
     <AssemblyName>$(Authors).$(MSBuildProjectName)</AssemblyName>
+    <!--
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
+    -->
   </PropertyGroup>
   
   <ItemGroup>
     <ProjectReference Include="..\LiteProtobuf.CompileTimeSourceGeneration\LiteProtobuf.CompileTimeSourceGeneration.csproj" PrivateAssets="all" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    <ProjectReference Include="..\LiteProtobuf.SourceGeneration\LiteProtobuf.SourceGeneration.csproj" ReferenceOutputAssembly="false" PackAsAnalyzer="true" />
+    <ProjectReference Include="..\LiteProtobuf.SourceGeneration\LiteProtobuf.SourceGeneration.csproj" PackAsAnalyzer="true" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
 </Project>

@@ -1,9 +1,11 @@
 ﻿using Myitian.LiteProtobuf.Serialization;
+using Myitian.LiteProtobuf.SourceGeneration;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Myitian.LiteProtobuf.Nodes;
 
-public abstract class ProtobufNode(WireType type)
+[DefaultTryCreateFulfilled(typeof(ProtobufNode))]
+public abstract partial class ProtobufNode(WireType type)
     : IProtobufType<ProtobufNode>
 {
     public WireType Type { get; } = type;
@@ -27,20 +29,24 @@ public abstract class ProtobufNode(WireType type)
         value = null;
         return false;
     }
-    public static bool TryCreateFulfilled<TReader>(scoped ref TReader reader, WireType wireType, [NotNullWhen(true)] out ProtobufNode? value, out ParseStatus status)
-        where TReader : IBinaryReader<TReader>, allows ref struct
-    {
-        if (!TryCreateInstance(wireType, out value))
-        {
-            status = ParseStatus.InvalidData;
-            return false;
-        }
-        return value.TryReadProtobuf(ref reader, wireType, out status);
-    }
-    public abstract bool TryReadProtobuf<TReader>(ref TReader reader, WireType receivedWireType, out ParseStatus status)
-        where TReader : IBinaryReader<TReader>, allows ref struct;
-    public abstract void ReadProtobuf<TReader>(ref TReader reader, WireType receivedWireType)
-        where TReader : IBinaryReader<TReader>, allows ref struct;
+    protected abstract bool SharedTryReadProtobuf<TReader>(ref TReader reader, WireType receivedWireType, out ParseStatus status)
+        where TReader : IBinaryReader, allows ref struct;
+    protected abstract void SharedReadProtobuf<TReader>(ref TReader reader, WireType receivedWireType)
+        where TReader : IBinaryReader, allows ref struct;
+    public virtual bool TryReadProtobuf<TReader>(ref TReader reader, WireType receivedWireType, out ParseStatus status)
+        where TReader : struct, IStructBinaryReader<TReader>, allows ref struct
+        => SharedTryReadProtobuf(ref reader, receivedWireType, out status);
+    public virtual bool TryReadProtobuf<TReader>(TReader reader, WireType receivedWireType, out ParseStatus status)
+        where TReader : class, IClassBinaryReader<TReader>
+        => SharedTryReadProtobuf(ref reader, receivedWireType, out status);
+    public virtual void ReadProtobuf<TReader>(ref TReader reader, WireType receivedWireType)
+        where TReader : struct, IStructBinaryReader<TReader>, allows ref struct
+        => SharedReadProtobuf(ref reader, receivedWireType);
+    public virtual void ReadProtobuf<TReader>(TReader reader, WireType receivedWireType)
+        where TReader : class, IClassBinaryReader<TReader>
+        => SharedReadProtobuf(ref reader, receivedWireType);
     public abstract void WriteProtobuf<TWriter>(ref TWriter writer, int index)
-        where TWriter : IBinaryWriter<TWriter>, allows ref struct;
+        where TWriter : struct, IStructBinaryWriter<TWriter>, allows ref struct;
+    public abstract void WriteProtobuf<TWriter>(TWriter writer, int index)
+        where TWriter : class, IClassBinaryWriter<TWriter>;
 }

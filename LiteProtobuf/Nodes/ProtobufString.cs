@@ -1,10 +1,12 @@
 ﻿using Myitian.LiteProtobuf.Serialization;
+using Myitian.LiteProtobuf.SourceGeneration;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace Myitian.LiteProtobuf.Nodes;
 
-public sealed class ProtobufString()
+[DefaultTryCreateFulfilled(typeof(ProtobufString))]
+public sealed partial class ProtobufString()
     : ProtobufNode(WireType.LengthDelimited), IProtobufType<ProtobufString>
 {
     public string? Value { get; set; }
@@ -18,17 +20,7 @@ public sealed class ProtobufString()
         value = new();
         return true;
     }
-    public static bool TryCreateFulfilled<TReader>(scoped ref TReader reader, WireType wireType, [NotNullWhen(true)] out ProtobufString? value, out ParseStatus status)
-        where TReader : IBinaryReader<TReader>, allows ref struct
-    {
-        if (!TryCreateInstance(wireType, out value))
-        {
-            status = ParseStatus.InvalidData;
-            return false;
-        }
-        return value.TryReadProtobuf(ref reader, wireType, out status);
-    }
-    public override bool TryReadProtobuf<TReader>(ref TReader reader, WireType receivedWireType, out ParseStatus status)
+    protected override bool SharedTryReadProtobuf<TReader>(ref TReader reader, WireType receivedWireType, out ParseStatus status)
     {
         if (receivedWireType is not WireType.LengthDelimited)
         {
@@ -52,7 +44,7 @@ public sealed class ProtobufString()
             return false;
         }
     }
-    public override void ReadProtobuf<TReader>(ref TReader reader, WireType receivedWireType)
+    protected override void SharedReadProtobuf<TReader>(ref TReader reader, WireType receivedWireType)
     {
         if (receivedWireType is not WireType.LengthDelimited)
             throw new InvalidDataException();
@@ -60,23 +52,26 @@ public sealed class ProtobufString()
     }
     public override void WriteProtobuf<TWriter>(ref TWriter writer, int index)
     {
-        ProtobufUtility.WriteTag(ref writer, index, WireType.LengthDelimited);
+        writer.WriteTag(index, WireType.LengthDelimited);
+        writer.WriteString(Value);
+    }
+    public override void WriteProtobuf<TWriter>(TWriter writer, int index)
+    {
+        writer.WriteTag(index, WireType.LengthDelimited);
         writer.WriteString(Value);
     }
     public override string ToString()
     {
-        return $"{{String, Length = {Value?.Length ?? 0}, {LimitedString(Value, 32)}}}";
+        return $"{{String, Length = {Value?.Length ?? 0}, {DisplayLimitedChars(Value, 32)}}}";
     }
-    public static string LimitedString(ReadOnlySpan<char> chars, int limit)
+    public static string DisplayLimitedChars(ReadOnlySpan<char> chars, int limit)
     {
         StringBuilder sb = new();
         sb.Append("b\"");
         for (int i = 0; i < chars.Length; i++)
         {
             if (i == limit)
-            {
                 return sb.Append($"\" ... and {chars.Length - limit} more").ToString();
-            }
             char c = chars[i];
             switch (c)
             {

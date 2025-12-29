@@ -20,26 +20,30 @@ public partial class Templates
         public static void Apply(SourceProductionContext context, Model model)
         {
             StringBuilder sb = new();
-            sb.AppendLine(Header).Append(' ', 4).AppendLine(model.Sign);
+            sb.AppendLine(ProtobufUtilityHeader).Append(' ', 4).AppendLine(model.Sign);
             foreach (IType type in types)
             {
                 if (model.Mode.StartsWith(type.Keyword))
                 {
-                    string suffix = model.Mode[type.Keyword.Length..];
+                    object[] args = [
+                        model.IsValueType ? "ref " : "",
+                        model.ElementType,
+                        model.Mode,
+                        model.Mode[type.Keyword.Length..]];
                     switch (model.ContainerType)
                     {
                         case nameof(ReadOnlySpan<>):
-                            sb.AppendFormat(type.ReadOnlySpan, model.ElementType, model.Mode, suffix);
+                            sb.AppendFormat(type.ReadOnlySpan, args);
                             break;
                         case nameof(IEnumerable<>):
-                            sb.AppendFormat(type.IEnumerable, model.ElementType, model.Mode, suffix);
+                            sb.AppendFormat(type.IEnumerable, args);
                             break;
                         default:
                             return;
                     }
-                    sb.AppendFormat(type.Common, model.ElementType, model.Mode, suffix);
-                    string code = sb.Append(Footer).ToString();
-                    context.AddSource($"ProtobufUtility.{model.Name}.{model.ContainerType}-{model.ElementType}.g.cs", code);
+                    sb.AppendFormat(type.Common, args);
+                    string code = sb.Append(ProtobufUtilityFooter).ToString();
+                    context.AddSource($"ProtobufUtility.{model.Name}.{model.ContainerType}-{model.ElementType}.{(model.IsValueType ? 'V' : 'C')}.g.cs", code);
                     return;
                 }
             }
@@ -62,6 +66,7 @@ public partial class Templates
             public string Mode { get; } = "";
             public string Name { get; } = "";
             public string Sign { get; } = "";
+            public bool IsValueType { get; } = false;
 
             public Model(GeneratorAttributeSyntaxContext context)
             {
@@ -77,10 +82,14 @@ public partial class Templates
                     || context.Attributes is not [
                         {
                             ConstructorArguments: [
-                                {
-                                    Kind: not TypedConstantKind.Array,
-                                    Value: string mode
-                                }]
+                            {
+                                Kind: TypedConstantKind.Primitive,
+                                Value: string mode
+                            },
+                            {
+                                Kind: TypedConstantKind.Primitive,
+                                Value: bool isValueType
+                            }]
                         }])
                     return;
 
@@ -89,6 +98,7 @@ public partial class Templates
                 Mode = mode;
                 Name = m.Identifier.Text;
                 Sign = SemicolonRemover.Instance.Visit(m).ToString();
+                IsValueType = isValueType;
                 IsValid = true;
             }
         }
