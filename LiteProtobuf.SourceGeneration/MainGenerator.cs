@@ -40,22 +40,22 @@ internal class MainGenerator : IIncrementalGenerator
             namespace {{NS_Myitian_LiteProtobuf_SourceGeneration}}
             {
                 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false, AllowMultiple = true)]
-                public sealed class {{N_DefaultTryCreateInstanceAttribute}} : Attribute
+                internal sealed class {{N_DefaultTryCreateInstanceAttribute}} : Attribute
                 {
                     public {{N_DefaultTryCreateInstanceAttribute}}(Type arg) { }
                 }
                 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false, AllowMultiple = true)]
-                public sealed class {{N_DefaultCreateInstanceAttribute}} : Attribute
+                internal sealed class {{N_DefaultCreateInstanceAttribute}} : Attribute
                 {
                     public {{N_DefaultCreateInstanceAttribute}}(Type arg) { }
                 }
                 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false, AllowMultiple = true)]
-                public sealed class {{N_DefaultTryCreateFulfilledAttribute}} : Attribute
+                internal sealed class {{N_DefaultTryCreateFulfilledAttribute}} : Attribute
                 {
                     public {{N_DefaultTryCreateFulfilledAttribute}}(Type arg) { }
                 }
                 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false, AllowMultiple = true)]
-                public sealed class {{N_DefaultCreateFulfilledAttribute}} : Attribute
+                internal sealed class {{N_DefaultCreateFulfilledAttribute}} : Attribute
                 {
                     public {{N_DefaultCreateFulfilledAttribute}}(Type arg) { }
                 }

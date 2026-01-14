@@ -80,24 +80,24 @@ public interface IBinaryReader : IDisposable
         public static byte ReadByte<TReader>(scoped ref TReader reader)
             where TReader : struct, IBinaryReader, allows ref struct
         {
-            return reader.TryReadByte(out byte value, out ParseStatus status) ? value : IBinaryReader.ThrowIfNotSuccess(value, status);
+            return reader.TryReadByte(out byte value, out ParseStatus status) ? value : ThrowIfNotSuccess(value, status);
         }
         public static byte ReadByte<TReader>(TReader reader)
             where TReader : class, IBinaryReader
         {
-            return reader.TryReadByte(out byte value, out ParseStatus status) ? value : IBinaryReader.ThrowIfNotSuccess(value, status);
+            return reader.TryReadByte(out byte value, out ParseStatus status) ? value : ThrowIfNotSuccess(value, status);
         }
         public static T ReadFixed32<TReader, T>(scoped ref TReader reader)
             where TReader : struct, IBinaryReader, allows ref struct
             where T : struct
         {
-            return reader.TryReadFixed32(out T value, out ParseStatus status) ? value : IBinaryReader.ThrowIfNotSuccess(value, status);
+            return reader.TryReadFixed32(out T value, out ParseStatus status) ? value : ThrowIfNotSuccess(value, status);
         }
         public static T ReadFixed32<TReader, T>(TReader reader)
             where TReader : class, IBinaryReader
             where T : struct
         {
-            return reader.TryReadFixed32(out T value, out ParseStatus status) ? value : IBinaryReader.ThrowIfNotSuccess(value, status);
+            return reader.TryReadFixed32(out T value, out ParseStatus status) ? value : ThrowIfNotSuccess(value, status);
         }
         public static bool TryReadFixed32<TReader, T>(scoped ref TReader reader, out T result, out ParseStatus status)
             where TReader : struct, IBinaryReader, allows ref struct
@@ -147,13 +147,13 @@ public interface IBinaryReader : IDisposable
             where TReader : struct, IBinaryReader, allows ref struct
             where T : struct
         {
-            return reader.TryReadFixed64(out T value, out ParseStatus status) ? value : IBinaryReader.ThrowIfNotSuccess(value, status);
+            return reader.TryReadFixed64(out T value, out ParseStatus status) ? value : ThrowIfNotSuccess(value, status);
         }
         public static T ReadFixed64<TReader, T>(TReader reader)
             where TReader : class, IBinaryReader
             where T : struct
         {
-            return reader.TryReadFixed64(out T value, out ParseStatus status) ? value : IBinaryReader.ThrowIfNotSuccess(value, status);
+            return reader.TryReadFixed64(out T value, out ParseStatus status) ? value : ThrowIfNotSuccess(value, status);
         }
         public static bool TryReadFixed64<TReader, T>(scoped ref TReader reader, out T result, out ParseStatus status)
             where TReader : struct, IBinaryReader, allows ref struct
@@ -203,13 +203,13 @@ public interface IBinaryReader : IDisposable
             where TReader : struct, IBinaryReader, allows ref struct
             where T : IBinaryInteger<T>
         {
-            return reader.TryReadVarInt(out T value, out ParseStatus status) ? value : IBinaryReader.ThrowIfNotSuccess(value, status);
+            return reader.TryReadVarInt(out T value, out ParseStatus status) ? value : ThrowIfNotSuccess(value, status);
         }
         public static T ReadVarInt<TReader, T>(TReader reader)
             where TReader : class, IBinaryReader
             where T : IBinaryInteger<T>
         {
-            return reader.TryReadVarInt(out T value, out ParseStatus status) ? value : IBinaryReader.ThrowIfNotSuccess(value, status);
+            return reader.TryReadVarInt(out T value, out ParseStatus status) ? value : ThrowIfNotSuccess(value, status);
         }
         public static bool TryReadVarInt<TReader, T>(scoped ref TReader reader, out T result, out ParseStatus status)
             where TReader : struct, IBinaryReader, allows ref struct
@@ -285,13 +285,13 @@ public interface IBinaryReader : IDisposable
             where TReader : struct, IBinaryReader, allows ref struct
             where T : IBinaryInteger<T>, ISignedNumber<T>
         {
-            return reader.TryReadVarIntZigZag(out T value, out ParseStatus status) ? value : IBinaryReader.ThrowIfNotSuccess(value, status);
+            return reader.TryReadVarIntZigZag(out T value, out ParseStatus status) ? value : ThrowIfNotSuccess(value, status);
         }
         public static T ReadVarIntZigZag<TReader, T>(TReader reader)
             where TReader : class, IBinaryReader
             where T : IBinaryInteger<T>, ISignedNumber<T>
         {
-            return reader.TryReadVarIntZigZag(out T value, out ParseStatus status) ? value : IBinaryReader.ThrowIfNotSuccess(value, status);
+            return reader.TryReadVarIntZigZag(out T value, out ParseStatus status) ? value : ThrowIfNotSuccess(value, status);
         }
         public static bool TryReadVarIntZigZag<TReader, T>(scoped ref TReader reader, out T result, out ParseStatus status)
             where TReader : struct, IBinaryReader, allows ref struct
@@ -320,12 +320,12 @@ public interface IBinaryReader : IDisposable
         public static bool ReadBool<TReader>(scoped ref TReader reader)
             where TReader : struct, IBinaryReader, allows ref struct
         {
-            return reader.TryReadBool(out bool value, out ParseStatus status) ? value : IBinaryReader.ThrowIfNotSuccess(value, status);
+            return reader.TryReadBool(out bool value, out ParseStatus status) ? value : ThrowIfNotSuccess(value, status);
         }
         public static bool ReadBool<TReader>(TReader reader)
             where TReader : class, IBinaryReader
         {
-            return reader.TryReadBool(out bool value, out ParseStatus status) ? value : IBinaryReader.ThrowIfNotSuccess(value, status);
+            return reader.TryReadBool(out bool value, out ParseStatus status) ? value : ThrowIfNotSuccess(value, status);
         }
         public static bool TryReadBool<TReader>(scoped ref TReader reader, out bool result, out ParseStatus status)
             where TReader : struct, IBinaryReader, allows ref struct
@@ -344,22 +344,22 @@ public interface IBinaryReader : IDisposable
         public static ReadOnlySpan<byte> ReadRawBlock<TReader>(scoped ref TReader reader, int length)
             where TReader : struct, IBinaryReader, allows ref struct
         {
-            return reader.TryReadRawBlock(length, out ReadOnlySpan<byte> value, out ParseStatus status) ? value : IBinaryReader.ThrowIfNotSuccess(value, status);
+            return reader.TryReadRawBlock(length, out ReadOnlySpan<byte> value, out ParseStatus status) ? value : ThrowIfNotSuccess(value, status);
         }
         public static ReadOnlySpan<byte> ReadRawBlock<TReader>(TReader reader, int length)
             where TReader : class, IBinaryReader
         {
-            return reader.TryReadRawBlock(length, out ReadOnlySpan<byte> value, out ParseStatus status) ? value : IBinaryReader.ThrowIfNotSuccess(value, status);
+            return reader.TryReadRawBlock(length, out ReadOnlySpan<byte> value, out ParseStatus status) ? value : ThrowIfNotSuccess(value, status);
         }
         public static ReadOnlySpan<byte> ReadLengthDelimited<TReader>(scoped ref TReader reader)
             where TReader : struct, IBinaryReader, allows ref struct
         {
-            return reader.TryReadLengthDelimited(out ReadOnlySpan<byte> value, out ParseStatus status) ? value : IBinaryReader.ThrowIfNotSuccess(value, status);
+            return reader.TryReadLengthDelimited(out ReadOnlySpan<byte> value, out ParseStatus status) ? value : ThrowIfNotSuccess(value, status);
         }
         public static ReadOnlySpan<byte> ReadLengthDelimited<TReader>(TReader reader)
             where TReader : class, IBinaryReader
         {
-            return reader.TryReadLengthDelimited(out ReadOnlySpan<byte> value, out ParseStatus status) ? value : IBinaryReader.ThrowIfNotSuccess(value, status);
+            return reader.TryReadLengthDelimited(out ReadOnlySpan<byte> value, out ParseStatus status) ? value : ThrowIfNotSuccess(value, status);
         }
         public static void SkipLengthDelimited<TReader>(scoped ref TReader reader)
             where TReader : struct, IBinaryReader, allows ref struct
@@ -380,12 +380,12 @@ public interface IBinaryReader : IDisposable
         public static byte[] ReadByteArray<TReader>(scoped ref TReader reader)
             where TReader : struct, IBinaryReader, allows ref struct
         {
-            return reader.TryReadByteArray(out byte[] value, out ParseStatus status) ? value : IBinaryReader.ThrowIfNotSuccess(value, status);
+            return reader.TryReadByteArray(out byte[] value, out ParseStatus status) ? value : ThrowIfNotSuccess(value, status);
         }
         public static byte[] ReadByteArray<TReader>(TReader reader)
             where TReader : class, IBinaryReader
         {
-            return reader.TryReadByteArray(out byte[] value, out ParseStatus status) ? value : IBinaryReader.ThrowIfNotSuccess(value, status);
+            return reader.TryReadByteArray(out byte[] value, out ParseStatus status) ? value : ThrowIfNotSuccess(value, status);
         }
     }
 }
