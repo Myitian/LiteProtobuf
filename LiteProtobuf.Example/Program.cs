@@ -28,7 +28,7 @@ class Program
                 Console.WriteLine(ex);
             }
             root = (ProtobufMessage)root.Expand();
-            root.WriteProtobufBody(writer);
+            root.WriteProtobufBody(writer, null);
 
             // If parsed correctly, the input and output should be consistent.
 

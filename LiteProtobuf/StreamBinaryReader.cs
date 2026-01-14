@@ -9,8 +9,9 @@ public class StreamBinaryReader(Stream stream, bool leaveOpen = false) : IClassB
     protected long _length = long.MaxValue;
     public Stream BaseStream { get; } = stream;
     public StreamBinaryReader(StreamBinaryReader parent, long length)
-        : this(new LengthLimitedStream(parent.BaseStream, length, true), false)
+        : this(new LengthLimitedStream(parent.BaseStream, (ulong)length, true), false)
     {
+        ArgumentOutOfRangeException.ThrowIfNegative(length);
         _parent = parent;
         _length = length;
     }
@@ -157,13 +158,13 @@ public class StreamBinaryReader(Stream stream, bool leaveOpen = false) : IClassB
 
     public static StreamBinaryReader CreateLengthDelimitedReader(StreamBinaryReader parent)
     {
-        long length = ((IBinaryReader)parent).ReadVarInt<long>();
+        ulong length = ((IBinaryReader)parent).ReadVarInt<ulong>();
         LengthLimitedStream limitedStream = new(parent.BaseStream, length, true);
         return new(limitedStream, false);
     }
     public static bool TryCreateLengthDelimitedReader(StreamBinaryReader parent, [NotNullWhen(true)] out StreamBinaryReader? subReader, out ParseStatus status)
     {
-        if (((IBinaryReader)parent).TryReadVarInt(out long length, out status))
+        if (((IBinaryReader)parent).TryReadVarInt(out ulong length, out status))
         {
             LengthLimitedStream limitedStream = new(parent.BaseStream, length, true);
             subReader = new(limitedStream, false);

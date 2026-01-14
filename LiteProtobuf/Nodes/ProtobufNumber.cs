@@ -78,14 +78,11 @@ public sealed partial class ProtobufNumber(WireType type, ulong value)
     }
     public override string ToString()
     {
-        switch (Type)
+        return Type switch
         {
-            case WireType.Fixed32:
-                return $"{{Number, Type = {Type}, Value = {Value} (as Single = {(BitConverter.UInt32BitsToSingle((uint)Value))})}}";
-            case WireType.Fixed64:
-                return $"{{Number, Type = {Type}, Value = {Value} (as Double = {(BitConverter.UInt64BitsToDouble(Value))})}}";
-            default:
-                return $"{{Number, Type = {Type}, Value = {Value} (as ZigZag = {ProtobufUtility.DecodeZigZag((long)Value)})}}";
-        }
+            WireType.Fixed32 => $"{{Number, Type = {Type}, Value = {Value} (as Single = {(BitConverter.UInt32BitsToSingle((uint)Value))})}}",
+            WireType.Fixed64 => $"{{Number, Type = {Type}, Value = {Value} (as Double = {(BitConverter.UInt64BitsToDouble(Value))})}}",
+            _ => $"{{Number, Type = {Type}, Value = {Value} (as ZigZag = {ProtobufUtility.DecodeZigZag((long)Value)})}}",
+        };
     }
 }
