@@ -4,9 +4,9 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Myitian.LiteProtobuf.Nodes;
 
-[DefaultCreateInstance(typeof(ProtobufNode))]
-[DefaultTryCreateFulfilled(typeof(ProtobufNode))]
-[DefaultCreateFulfilled(typeof(ProtobufNode))]
+[DefaultCreateInstance]
+[DefaultTryCreateFulfilled]
+[DefaultCreateFulfilled]
 public abstract partial class ProtobufNode(WireType type)
     : IProtobufType<ProtobufNode>
 {
@@ -55,13 +55,13 @@ public abstract partial class ProtobufNode(WireType type)
     public virtual void WriteProtobuf<TWriter>(scoped ref TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)
         where TWriter : struct, IStructBinaryWriter<TWriter>, allows ref struct
     {
-        writer.WriteTag(fieldInfo.Index, Type);
+        writer.WriteTag(fieldInfo.Number, Type);
         SharedWriteProtobuf(ref writer, fieldInfo, options);
     }
     public virtual void WriteProtobuf<TWriter>(TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)
         where TWriter : class, IClassBinaryWriter<TWriter>
     {
-        writer.WriteTag(fieldInfo.Index, Type);
+        writer.WriteTag(fieldInfo.Number, Type);
         SharedWriteProtobuf(ref writer, fieldInfo, options);
     }
 }

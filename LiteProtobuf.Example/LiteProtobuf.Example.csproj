@@ -15,7 +15,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!--<PackageReference Include="Myitian.LiteProtobuf" Version="1.0.0" />-->
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\LiteProtobuf\LiteProtobuf.csproj" />
+    <ProjectReference Include="..\LiteProtobuf.SourceGeneration\LiteProtobuf.SourceGeneration.csproj" PrivateAssets="all" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
 </Project>

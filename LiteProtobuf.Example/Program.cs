@@ -1,4 +1,6 @@
 using Myitian.LiteProtobuf.Nodes;
+using Myitian.LiteProtobuf.Serialization;
+using Myitian.LiteProtobuf.SourceGeneration;
 
 namespace Myitian.LiteProtobuf.Example;
 
@@ -36,12 +38,62 @@ class Program
         }
         finally
         {
-            reader.Dispose(); // Although the SpanBinaryReader doesn't need Dispose
+            reader.Dispose(); // Although the SpanBinaryReader doesn't need Dispose actually
         }
     }
 
     public static int Test(ref readonly SpanBinaryReader reader)
     {
         return reader.ReadFixed32<int>();
+    }
+}
+
+
+[DefaultTryCreateInstance]
+[DefaultCreateInstance]
+[DefaultTryCreateFulfilled]
+[DefaultCreateFulfilled]
+[GeneratedProtobufTypeSerializer]
+partial class Example : IProtobufType<Example>
+{
+    [ProtobufField(0, Handler = typeof(object))]
+    public int TestVal;
+    public static bool IsFieldInfoValid(FieldInfo fieldInfo, SerializationOptions? options)
+    {
+        throw new NotImplementedException();
+    }
+    public bool IsFieldInfoValidForInstance(FieldInfo fieldInfo, SerializationOptions? options)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void ReadProtobuf<TReader>(scoped ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options) where TReader : struct, IStructBinaryReader<TReader>, allows ref struct
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool TryReadProtobuf<TReader>(scoped ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status) where TReader : struct, IStructBinaryReader<TReader>, allows ref struct
+    {
+        throw new NotImplementedException();
+    }
+
+    public void WriteProtobuf<TWriter>(scoped ref TWriter writer, FieldInfo fieldInfo, SerializationOptions? options) where TWriter : struct, IStructBinaryWriter<TWriter>, allows ref struct
+    {
+        throw new NotImplementedException();
+    }
+
+    void IReadOnlyProtobufType<Example>.ReadProtobuf<TReader>(TReader reader, FieldInfo fieldInfo, SerializationOptions? options)
+    {
+        throw new NotImplementedException();
+    }
+
+    bool IReadOnlyProtobufType<Example>.TryReadProtobuf<TReader>(TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
+    {
+        throw new NotImplementedException();
+    }
+
+    void IWriteOnlyProtobufType<Example>.WriteProtobuf<TWriter>(TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)
+    {
+        throw new NotImplementedException();
     }
 }

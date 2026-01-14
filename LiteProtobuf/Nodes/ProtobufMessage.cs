@@ -4,10 +4,10 @@ using System.Text;
 
 namespace Myitian.LiteProtobuf.Nodes;
 
-[DefaultTryCreateInstance(typeof(ProtobufMessage))]
-[DefaultCreateInstance(typeof(ProtobufMessage))]
-[DefaultTryCreateFulfilled(typeof(ProtobufMessage))]
-[DefaultCreateFulfilled(typeof(ProtobufMessage))]
+[DefaultTryCreateInstance]
+[DefaultCreateInstance]
+[DefaultTryCreateFulfilled]
+[DefaultCreateFulfilled]
 public sealed partial class ProtobufMessage()
     : ProtobufNode(WireType.LengthDelimited), IProtobufType<ProtobufMessage>
 {
@@ -63,7 +63,7 @@ public sealed partial class ProtobufMessage()
                     status = ParseStatus.InvalidData;
                     return false;
                 }
-                Children.Add(new(fieldInfo.Index, child));
+                Children.Add(new(fieldInfo.Number, child));
             }
             status = subStatus == ParseStatus.ExactEndOfStream ? ParseStatus.Success : ParseStatus.InvalidData;
             return true;
@@ -97,7 +97,7 @@ public sealed partial class ProtobufMessage()
                     status = ParseStatus.InvalidData;
                     return false;
                 }
-                Children.Add(new(fieldInfo.Index, child));
+                Children.Add(new(fieldInfo.Number, child));
             }
             status = subStatus == ParseStatus.ExactEndOfStream ? ParseStatus.Success : ParseStatus.InvalidData;
             return true;
@@ -133,7 +133,7 @@ public sealed partial class ProtobufMessage()
             if (!TryCreateInstance(fi, null, out ProtobufNode? child))
                 throw new InvalidDataException($"Invalid wire type: {fi}");
             child.ReadProtobuf(ref subReader, fi, null);
-            Children.Add(new(fi.Index, child));
+            Children.Add(new(fi.Number, child));
         }
         if (subStatus != ParseStatus.ExactEndOfStream)
             throw new InvalidDataException();
@@ -148,14 +148,14 @@ public sealed partial class ProtobufMessage()
             if (!TryCreateInstance(fi, null, out ProtobufNode? child))
                 throw new InvalidDataException($"Invalid data: {fi}");
             child.ReadProtobuf(subReader, fi, null);
-            Children.Add(new(fi.Index, child));
+            Children.Add(new(fi.Number, child));
         }
         if (subStatus != ParseStatus.ExactEndOfStream)
             throw new InvalidDataException();
     }
     public override void WriteProtobuf<TWriter>(scoped ref TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)
     {
-        writer.WriteTag(fieldInfo.Index, Type);
+        writer.WriteTag(fieldInfo.Number, Type);
         TWriter subWriter = TWriter.CreateLengthDelimitedWriter(ref writer);
         try
         {
@@ -168,7 +168,7 @@ public sealed partial class ProtobufMessage()
     }
     public override void WriteProtobuf<TWriter>(TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)
     {
-        writer.WriteTag(fieldInfo.Index, Type);
+        writer.WriteTag(fieldInfo.Number, Type);
         using TWriter subWriter = TWriter.CreateLengthDelimitedWriter(writer);
         WriteProtobufBody(subWriter, options);
     }
@@ -176,13 +176,13 @@ public sealed partial class ProtobufMessage()
         where TWriter : struct, IStructBinaryWriter<TWriter>, allows ref struct
     {
         foreach ((int i, ProtobufNode node) in Children)
-            node.WriteProtobuf(ref writer, new() { Index = i }, options);
+            node.WriteProtobuf(ref writer, new() { Number = i }, options);
     }
     public void WriteProtobufBody<TWriter>(TWriter writer, SerializationOptions? options)
         where TWriter : class, IClassBinaryWriter<TWriter>
     {
         foreach ((int i, ProtobufNode node) in Children)
-            node.WriteProtobuf(writer, new() { Index = i }, options);
+            node.WriteProtobuf(writer, new() { Number = i }, options);
     }
 
     public override string ToString()

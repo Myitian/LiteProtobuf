@@ -73,7 +73,7 @@ public partial class Templates
                 if (context.TargetNode is not MethodDeclarationSyntax m
                     || m?.ParameterList
                         .Parameters
-                        .FirstOrDefault(it => it.Identifier.Text == "value")
+                        .FirstOrDefault(static it => it.Identifier.Text == "value")
                         ?.Type is not GenericNameSyntax
                         {
                             Identifier.Text: string containerType,

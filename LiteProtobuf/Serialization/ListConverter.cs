@@ -115,10 +115,10 @@ public class BooleanGenericListConverter<T>
     }
     public override void WriteProtobuf<TWriter>(List<bool> self, scoped ref TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)
     {
-        ProtobufUtility.WriteRepeatedBool(ref writer, fieldInfo.Index, self, fieldInfo.FieldTypeHint.GetRepeatedEncoding());
+        ProtobufUtility.WriteRepeatedBool(ref writer, fieldInfo.Number, self, fieldInfo.FieldTypeHint.GetRepeatedEncoding());
     }
     public override void WriteProtobuf<TWriter>(List<bool> self, TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)
     {
-        ProtobufUtility.WriteRepeatedBool(writer, fieldInfo.Index, self, fieldInfo.FieldTypeHint.GetRepeatedEncoding());
+        ProtobufUtility.WriteRepeatedBool(writer, fieldInfo.Number, self, fieldInfo.FieldTypeHint.GetRepeatedEncoding());
     }
 }

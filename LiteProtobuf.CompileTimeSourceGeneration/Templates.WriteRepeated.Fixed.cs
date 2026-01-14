@@ -41,7 +41,7 @@ public partial class Templates
                 
                 """;
             public string Common => """
-                                writer.WriteTag(index, WireType.LengthDelimited);
+                                writer.WriteTag(number, WireType.LengthDelimited);
                                 writer.WriteVarInt(totalSize);
                                 foreach ({1} it in value)
                                     writer.Write{2}(it);
@@ -49,7 +49,7 @@ public partial class Templates
                             case RepeatedEncoding.NonPacked:
                                 foreach ({1} it in value)
                                 {{
-                                    writer.WriteTag(index, WireType.{2});
+                                    writer.WriteTag(number, WireType.{2});
                                     writer.Write{2}(it);
                                 }}
                                 break;

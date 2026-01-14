@@ -4,10 +4,10 @@ using System.Text;
 
 namespace Myitian.LiteProtobuf.Nodes;
 
-[DefaultTryCreateInstance(typeof(ProtobufByteArray))]
-[DefaultCreateInstance(typeof(ProtobufByteArray))]
-[DefaultTryCreateFulfilled(typeof(ProtobufByteArray))]
-[DefaultCreateFulfilled(typeof(ProtobufByteArray))]
+[DefaultTryCreateInstance]
+[DefaultCreateInstance]
+[DefaultTryCreateFulfilled]
+[DefaultCreateFulfilled]
 public partial class ProtobufByteArray()
     : ProtobufNode(WireType.LengthDelimited), IProtobufType<ProtobufByteArray>
 {
@@ -34,7 +34,7 @@ public partial class ProtobufByteArray()
                         return null;
                     if (recursion != 0)
                         child = child.Expand();
-                    result.Children.Add(new(fi.Index, child));
+                    result.Children.Add(new(fi.Number, child));
                 }
                 if (subStatus != ParseStatus.ExactEndOfStream)
                     return null;
@@ -151,7 +151,7 @@ public partial class ProtobufByteArray()
                     if (childMessage is not null)
                         child = childMessage;
                 }
-                result.Children.Add(new(fi.Index, child));
+                result.Children.Add(new(fi.Number, child));
             }
             if (subStatus != ParseStatus.ExactEndOfStream)
                 return null;

@@ -15,7 +15,7 @@ public partial class Templates
                         {{
                             case RepeatedEncoding.Auto:
                             case RepeatedEncoding.Packed:
-                                writer.WriteTag(index, WireType.LengthDelimited);
+                                writer.WriteTag(number, WireType.LengthDelimited);
                                 writer.WriteVarInt(value.Length);
                 
                 """;
@@ -38,7 +38,7 @@ public partial class Templates
                                 count = value.Count();
                                 goto case RepeatedEncoding.Packed;
                             case RepeatedEncoding.Packed:
-                                writer.WriteTag(index, WireType.LengthDelimited);
+                                writer.WriteTag(number, WireType.LengthDelimited);
                                 writer.WriteVarInt(count);
                 
                 """;
@@ -49,7 +49,7 @@ public partial class Templates
                             case RepeatedEncoding.NonPacked:
                                 foreach ({1} it in value)
                                 {{
-                                    writer.WriteTag(index, WireType.VarInt);
+                                    writer.WriteTag(number, WireType.VarInt);
                                     writer.Write{2}(it);
                                 }}
                                 break;

@@ -1,13 +1,10 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Text;
 
 namespace Myitian.LiteProtobuf.SourceGeneration;
 
-partial class Defaults
+static class Defaults
 {
     public interface IType
     {
@@ -101,24 +98,20 @@ partial class Defaults
         context.RegisterSourceOutput(context.SyntaxProvider.ForAttributeWithMetadataName(
             fullyQualifiedMetadataName: type.FullyQualifiedMetadataName,
             predicate: static (syntaxNode, _) => syntaxNode is BaseTypeDeclarationSyntax,
-            transform: static (context, _) => new Model(context))
-            .Where(it => it.IsValid)
-            .Combine(context.CompilationProvider), (context, model) => Apply(context, type.Prefix, type.Template, model));
+            transform: static (context, _) => context.TargetSymbol as INamedTypeSymbol),
+            (context, self) => Apply(context, type.Prefix, type.Template, self));
     }
-    public static void Apply(SourceProductionContext context, string prefix, string template, (Model Model, Compilation Compilation) model)
+    public static void Apply(SourceProductionContext context, string prefix, string template, INamedTypeSymbol? self)
     {
-        if (model.Model is not { Self: INamedTypeSymbol self })
+        if (self is null)
             return;
         StringBuilder sb = new();
         int depth = sb.AppendCSharpCode("#pragma warning disable CS0108", self);
-        foreach (INamedTypeSymbol arg in model.Model.Args)
-        {
-            ITypeSymbol symbol = arg.IsValueType ?
-                arg : arg.WithNullableAnnotation(NullableAnnotation.Annotated);
-            string c0 = symbol.ToDisplayString(Utils.NullableFullyQualifiedFormat);
-            string c1 = symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-            sb.AppendIndented(depth, string.Format(template, c0, c1));
-        }
+        ITypeSymbol symbol = self.IsValueType ?
+            self : self.WithNullableAnnotation(NullableAnnotation.Annotated);
+        string c0 = symbol.ToDisplayString(Utils.NullableFullyQualifiedFormat);
+        string c1 = symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        sb.AppendIndented(depth, string.Format(template, c0, c1));
         while (depth > 0)
         {
             depth--;
@@ -127,34 +120,5 @@ partial class Defaults
         }
         string code = sb.ToString();
         context.AddSource($"{new StringBuilder().AppendClrName(self)}-{prefix}.g.cs", code);
-    }
-    public readonly record struct Model
-    {
-        public bool IsValid => Self is not null && !Args.IsDefaultOrEmpty;
-        public INamedTypeSymbol? Self { get; } = null;
-        public ImmutableArray<INamedTypeSymbol> Args { get; }
-
-        public Model(GeneratorAttributeSyntaxContext context)
-        {
-            if (context.TargetSymbol is not INamedTypeSymbol self)
-                return;
-            List<INamedTypeSymbol> args = [];
-            List<string> omitWarningList = [];
-            foreach (AttributeData attr in context.Attributes)
-            {
-                if (attr is not
-                    {
-                        ConstructorArguments: [
-                        {
-                            Kind: TypedConstantKind.Type,
-                            Value: INamedTypeSymbol arg
-                        }]
-                    })
-                    return;
-                args.Add(arg);
-            }
-            Self = self;
-            Args = [.. args];
-        }
     }
 }

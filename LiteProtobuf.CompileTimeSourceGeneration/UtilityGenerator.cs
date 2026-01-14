@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-// using System.Threading;
 
 namespace Myitian.LiteProtobuf.CompileTimeSourceGeneration;
 
@@ -25,7 +24,7 @@ public class UtilityGenerator : IIncrementalGenerator
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        // new Thread(() => Thread.Sleep(100000)) { IsBackground = false }.Start(); // Keep console not to close
+        // new System.Threading.Thread(static () => System.Threading.Thread.Sleep(100000)) { IsBackground = false }.Start(); // Keep console not to close
         context.RegisterPostInitializationOutput(static postInitializationContext =>
             postInitializationContext.AddSource(
                 "Attributes.g.cs",
@@ -35,13 +34,13 @@ public class UtilityGenerator : IIncrementalGenerator
             fullyQualifiedMetadataName: FQ_ReadRepeatedAttribute,
             predicate: static (syntaxNode, _) => syntaxNode is MethodDeclarationSyntax,
             transform: static (context, _) => new Templates.ReadRepeated.Model(context))
-            .Where(it => it.IsValid), Templates.ReadRepeated.Apply);
+            .Where(static it => it.IsValid), Templates.ReadRepeated.Apply);
 
         context.RegisterSourceOutput(context.SyntaxProvider.ForAttributeWithMetadataName(
             fullyQualifiedMetadataName: FQ_WriteRepeatedAttribute,
             predicate: static (syntaxNode, _) => syntaxNode is MethodDeclarationSyntax,
             transform: static (context, _) => new Templates.WriteRepeated.Model(context))
-            .Where(it => it.IsValid), Templates.WriteRepeated.Apply);
+            .Where(static it => it.IsValid), Templates.WriteRepeated.Apply);
     }
 
     public static int CreateCSharpCode(StringBuilder sb, string usings, INamedTypeSymbol symbol)
