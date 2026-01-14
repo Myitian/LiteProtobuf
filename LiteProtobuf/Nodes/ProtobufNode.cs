@@ -38,25 +38,25 @@ public abstract partial class ProtobufNode(WireType type)
         value = null;
         return false;
     }
-    protected abstract bool SharedTryReadProtobuf<TReader>(ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
+    protected abstract bool SharedTryReadProtobuf<TReader>(scoped ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
         where TReader : IBinaryReader, allows ref struct;
-    protected abstract void SharedReadProtobuf<TReader>(ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options)
+    protected abstract void SharedReadProtobuf<TReader>(scoped ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options)
         where TReader : IBinaryReader, allows ref struct;
-    protected abstract void SharedWriteProtobuf<TWriter>(ref TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)
+    protected abstract void SharedWriteProtobuf<TWriter>(scoped ref TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)
         where TWriter : IBinaryWriter, allows ref struct;
-    public virtual bool TryReadProtobuf<TReader>(ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
+    public virtual bool TryReadProtobuf<TReader>(scoped ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
         where TReader : struct, IStructBinaryReader<TReader>, allows ref struct
         => SharedTryReadProtobuf(ref reader, fieldInfo, options, out status);
     public virtual bool TryReadProtobuf<TReader>(TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
         where TReader : class, IClassBinaryReader<TReader>
         => SharedTryReadProtobuf(ref reader, fieldInfo, options, out status);
-    public virtual void ReadProtobuf<TReader>(ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options)
+    public virtual void ReadProtobuf<TReader>(scoped ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options)
         where TReader : struct, IStructBinaryReader<TReader>, allows ref struct
         => SharedReadProtobuf(ref reader, fieldInfo, options);
     public virtual void ReadProtobuf<TReader>(TReader reader, FieldInfo fieldInfo, SerializationOptions? options)
         where TReader : class, IClassBinaryReader<TReader>
         => SharedReadProtobuf(ref reader, fieldInfo, options);
-    public virtual void WriteProtobuf<TWriter>(ref TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)
+    public virtual void WriteProtobuf<TWriter>(scoped ref TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)
         where TWriter : struct, IStructBinaryWriter<TWriter>, allows ref struct
     {
         writer.WriteTag(fieldInfo.Index, Type);

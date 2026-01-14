@@ -33,13 +33,13 @@ public sealed partial class ProtobufMessage()
     {
         return fieldInfo.ReceivedWireType is WireType.LengthDelimited;
     }
-    protected override bool SharedTryReadProtobuf<TReader>(ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
+    protected override bool SharedTryReadProtobuf<TReader>(scoped ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
         => throw new NotSupportedException();
-    protected override void SharedReadProtobuf<TReader>(ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options)
+    protected override void SharedReadProtobuf<TReader>(scoped ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options)
         => throw new NotSupportedException();
-    protected override void SharedWriteProtobuf<TWriter>(ref TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)
+    protected override void SharedWriteProtobuf<TWriter>(scoped ref TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)
         => throw new NotSupportedException();
-    public override bool TryReadProtobuf<TReader>(ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
+    public override bool TryReadProtobuf<TReader>(scoped ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
     {
         if (!IsFieldInfoValidForInstance(fieldInfo, options))
         {
@@ -103,7 +103,7 @@ public sealed partial class ProtobufMessage()
             return true;
         }
     }
-    public override void ReadProtobuf<TReader>(ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options)
+    public override void ReadProtobuf<TReader>(scoped ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options)
     {
         if (!IsFieldInfoValidForInstance(fieldInfo, options))
             throw new InvalidDataException();
@@ -153,7 +153,7 @@ public sealed partial class ProtobufMessage()
         if (subStatus != ParseStatus.ExactEndOfStream)
             throw new InvalidDataException();
     }
-    public override void WriteProtobuf<TWriter>(ref TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)
+    public override void WriteProtobuf<TWriter>(scoped ref TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)
     {
         writer.WriteTag(fieldInfo.Index, Type);
         TWriter subWriter = TWriter.CreateLengthDelimitedWriter(ref writer);
@@ -172,7 +172,7 @@ public sealed partial class ProtobufMessage()
         using TWriter subWriter = TWriter.CreateLengthDelimitedWriter(writer);
         WriteProtobufBody(subWriter, options);
     }
-    public void WriteProtobufBody<TWriter>(ref TWriter writer, SerializationOptions? options)
+    public void WriteProtobufBody<TWriter>(scoped ref TWriter writer, SerializationOptions? options)
         where TWriter : struct, IStructBinaryWriter<TWriter>, allows ref struct
     {
         foreach ((int i, ProtobufNode node) in Children)
@@ -197,7 +197,7 @@ public sealed partial class ProtobufMessage()
             sb.Append(' ', indent * depth);
             if (id.HasValue)
                 sb.Append(id.Value).Append(": ");
-            sb.AppendLine(((object)this).ToString());
+            sb.AppendLine(ToString());
             int nextRecursion = Math.Max(recursion, 0) - 1;
             if (nextRecursion != 0)
             {

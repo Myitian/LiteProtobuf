@@ -1,5 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
-using System.Threading;
+// using System.Threading;
 
 namespace Myitian.LiteProtobuf.SourceGeneration;
 

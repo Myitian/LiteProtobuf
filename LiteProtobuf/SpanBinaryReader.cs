@@ -151,11 +151,11 @@ public ref struct SpanBinaryReader(ReadOnlySpan<byte> bytes) : IStructBinaryRead
     {
     }
 
-    public static SpanBinaryReader CreateLengthDelimitedReader(ref SpanBinaryReader parent)
+    public static SpanBinaryReader CreateLengthDelimitedReader(scoped ref SpanBinaryReader parent)
     {
         return new(parent.ReadLengthDelimited());
     }
-    public static bool TryCreateLengthDelimitedReader(ref SpanBinaryReader parent, [NotNullWhen(true)] out SpanBinaryReader subReader, out ParseStatus status)
+    public static bool TryCreateLengthDelimitedReader(scoped ref SpanBinaryReader parent, [NotNullWhen(true)] out SpanBinaryReader subReader, out ParseStatus status)
     {
         if (parent.TryReadLengthDelimited(out ReadOnlySpan<byte> span, out status))
         {

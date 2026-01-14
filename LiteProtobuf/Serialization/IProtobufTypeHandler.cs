@@ -17,21 +17,21 @@ public interface IReadOnlyStructProtobufTypeHandler<T>
     : IProtobufTypeFactory<T>
     where T : struct, allows ref struct
 {
-    bool TryReadProtobuf<TReader>(ref T self, ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
+    bool TryReadProtobuf<TReader>(scoped ref T self, scoped ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
         where TReader : struct, IStructBinaryReader<TReader>, allows ref struct;
-    bool TryReadProtobuf<TReader>(ref T self, TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
+    bool TryReadProtobuf<TReader>(scoped ref T self, TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
         where TReader : class, IClassBinaryReader<TReader>;
-    void ReadProtobuf<TReader>(ref T self, ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options)
+    void ReadProtobuf<TReader>(scoped ref T self, scoped ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options)
         where TReader : struct, IStructBinaryReader<TReader>, allows ref struct;
-    void ReadProtobuf<TReader>(ref T self, TReader reader, FieldInfo fieldInfo, SerializationOptions? options)
+    void ReadProtobuf<TReader>(scoped ref T self, TReader reader, FieldInfo fieldInfo, SerializationOptions? options)
         where TReader : class, IClassBinaryReader<TReader>;
 }
 public interface IWriteOnlyStructProtobufTypeHandler<T>
     where T : struct, allows ref struct
 {
-    WireType WriteProtobuf<TWriter>(ref T self, ref TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)
+    void WriteProtobuf<TWriter>(scoped ref T self, scoped ref TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)
         where TWriter : struct, IStructBinaryWriter<TWriter>, allows ref struct;
-    WireType WriteProtobuf<TWriter>(ref T self, TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)
+    void WriteProtobuf<TWriter>(scoped ref T self, TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)
         where TWriter : class, IClassBinaryWriter<TWriter>;
 }
 public interface IStructProtobufTypeHandler<T>
@@ -41,11 +41,11 @@ public interface IReadOnlyClassProtobufTypeHandler<T>
     : IProtobufTypeFactory<T>
     where T : class
 {
-    bool TryReadProtobuf<TReader>(T self, ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
+    bool TryReadProtobuf<TReader>(T self, scoped ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
             where TReader : struct, IStructBinaryReader<TReader>, allows ref struct;
     bool TryReadProtobuf<TReader>(T self, TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
             where TReader : class, IClassBinaryReader<TReader>;
-    void ReadProtobuf<TReader>(T self, ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options)
+    void ReadProtobuf<TReader>(T self, scoped ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options)
             where TReader : struct, IStructBinaryReader<TReader>, allows ref struct;
     void ReadProtobuf<TReader>(T self, TReader reader, FieldInfo fieldInfo, SerializationOptions? options)
             where TReader : class, IClassBinaryReader<TReader>;
@@ -53,7 +53,7 @@ public interface IReadOnlyClassProtobufTypeHandler<T>
 public interface IWriteOnlyClassProtobufTypeHandler<T>
     where T : class
 {
-    void WriteProtobuf<TWriter>(T self, ref TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)
+    void WriteProtobuf<TWriter>(T self, scoped ref TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)
             where TWriter : struct, IStructBinaryWriter<TWriter>, allows ref struct;
     void WriteProtobuf<TWriter>(T self, TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)
             where TWriter : class, IClassBinaryWriter<TWriter>;

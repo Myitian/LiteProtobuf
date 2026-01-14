@@ -50,7 +50,7 @@ public partial class ProtobufByteArray()
     {
         return fieldInfo.ReceivedWireType is WireType.LengthDelimited;
     }
-    protected override bool SharedTryReadProtobuf<TReader>(ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
+    protected override bool SharedTryReadProtobuf<TReader>(scoped ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
     {
         if (!IsFieldInfoValidForInstance(fieldInfo, options))
         {
@@ -69,13 +69,13 @@ public partial class ProtobufByteArray()
             return false;
         }
     }
-    protected override void SharedReadProtobuf<TReader>(ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options)
+    protected override void SharedReadProtobuf<TReader>(scoped ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options)
     {
         if (!IsFieldInfoValidForInstance(fieldInfo, options))
             throw new InvalidDataException();
         Data = reader.ReadByteArray();
     }
-    protected override void SharedWriteProtobuf<TWriter>(ref TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)
+    protected override void SharedWriteProtobuf<TWriter>(scoped ref TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)
     {
         writer.WriteLengthDelimited(Data);
     }

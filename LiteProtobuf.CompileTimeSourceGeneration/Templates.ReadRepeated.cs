@@ -66,20 +66,20 @@ public partial class Templates
             {
                 if (context.TargetNode is not MethodDeclarationSyntax m
                     || context.Attributes is not [
-                    {
-                        ConstructorArguments: [
                         {
-                            Kind: TypedConstantKind.Primitive,
-                            Value: string mode
-                        },
-                        {
-                            Kind: TypedConstantKind.Primitive,
-                            Value: bool isValueType
-                        },
-                        {
-                            Kind: TypedConstantKind.Primitive
-                        } extraName]
-                    }])
+                            ConstructorArguments: [
+                            {
+                                Kind: TypedConstantKind.Primitive,
+                                Value: string mode
+                            },
+                            {
+                                Kind: TypedConstantKind.Primitive,
+                                Value: bool isValueType
+                            },
+                            {
+                                Kind: TypedConstantKind.Primitive
+                            } extraName]
+                        }])
                     return;
 
                 Mode = mode;

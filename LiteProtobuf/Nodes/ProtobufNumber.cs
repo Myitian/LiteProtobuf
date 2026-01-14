@@ -26,7 +26,7 @@ public sealed partial class ProtobufNumber(WireType type, ulong value)
         value = new(fieldInfo.ReceivedWireType, 0);
         return true;
     }
-    protected override bool SharedTryReadProtobuf<TReader>(ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
+    protected override bool SharedTryReadProtobuf<TReader>(scoped ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
     {
         if (!IsFieldInfoValid(fieldInfo, options))
         {
@@ -49,7 +49,7 @@ public sealed partial class ProtobufNumber(WireType type, ulong value)
                 return false;
         }
     }
-    protected override void SharedReadProtobuf<TReader>(ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options)
+    protected override void SharedReadProtobuf<TReader>(scoped ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options)
     {
         Value = fieldInfo.ReceivedWireType switch
         {
@@ -59,7 +59,7 @@ public sealed partial class ProtobufNumber(WireType type, ulong value)
             _ => throw new InvalidDataException(),
         };
     }
-    protected override void SharedWriteProtobuf<TWriter>(ref TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)
+    protected override void SharedWriteProtobuf<TWriter>(scoped ref TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)
     {
         switch (Type)
         {

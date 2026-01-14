@@ -177,8 +177,8 @@ public interface IBinaryReader : IDisposable
 public interface IStructBinaryReader<TReader> : IBinaryReader
     where TReader : struct, IStructBinaryReader<TReader>, allows ref struct
 {
-    public static abstract TReader CreateLengthDelimitedReader(ref TReader parent);
-    public static abstract bool TryCreateLengthDelimitedReader(ref TReader parent, [NotNullWhen(true)] out TReader subReader, out ParseStatus status);
+    public static abstract TReader CreateLengthDelimitedReader(scoped ref TReader parent);
+    public static abstract bool TryCreateLengthDelimitedReader(scoped ref TReader parent, [NotNullWhen(true)] out TReader subReader, out ParseStatus status);
 }
 public interface IClassBinaryReader<TReader> : IBinaryReader
     where TReader : class, IClassBinaryReader<TReader>
