@@ -53,7 +53,7 @@ public sealed partial class ProtobufString()
     }
     public override string ToString()
     {
-        return $"{{String, Length = {Value?.Length ?? 0}, {DisplayLimitedChars(Value, 32)}}}";
+        return $"{{String, Length = {Value?.Length ?? 0}, {DisplayLimitedChars(Value, 50)}}}";
     }
     public static string DisplayLimitedChars(ReadOnlySpan<char> chars, int limit)
     {

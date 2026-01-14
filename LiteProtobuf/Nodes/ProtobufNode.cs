@@ -13,16 +13,12 @@ public abstract partial class ProtobufNode(WireType type)
     public WireType Type { get; } = type;
 
     public virtual ProtobufNode Expand(int recursion = -1)
-    {
-        return this;
-    }
+        => this;
     public virtual bool IsFieldInfoValidForInstance(FieldInfo fieldInfo, SerializationOptions? options)
         => fieldInfo.ReceivedWireType == Type;
     public static bool IsFieldInfoValid(FieldInfo fieldInfo, SerializationOptions? options)
-    {
-        return ProtobufByteArray.IsFieldInfoValid(fieldInfo, options)
-            || ProtobufNumber.IsFieldInfoValid(fieldInfo, options);
-    }
+        => ProtobufByteArray.IsFieldInfoValid(fieldInfo, options)
+        || ProtobufNumber.IsFieldInfoValid(fieldInfo, options);
     public static bool TryCreateInstance(FieldInfo fieldInfo, SerializationOptions? options, [NotNullWhen(true)] out ProtobufNode? value)
     {
         if (ProtobufByteArray.TryCreateInstance(fieldInfo, options, out ProtobufByteArray? v1))

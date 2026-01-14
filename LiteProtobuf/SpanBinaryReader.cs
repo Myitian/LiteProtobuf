@@ -10,7 +10,7 @@ public ref struct SpanBinaryReader(ReadOnlySpan<byte> bytes) : IStructBinaryRead
     public int Position { get; set; }
 
     public byte ReadByte()
-        => BinaryReaderExtension.ReadByte(ref this);
+        => IBinaryReader.Defaults.ReadByte(ref this);
     public bool TryReadByte(out byte result, out ParseStatus status)
     {
         long nextPos = Position + (long)sizeof(byte);
@@ -27,34 +27,34 @@ public ref struct SpanBinaryReader(ReadOnlySpan<byte> bytes) : IStructBinaryRead
     }
     public T ReadFixed32<T>()
         where T : struct
-        => BinaryReaderExtension.ReadFixed32<SpanBinaryReader, T>(ref this);
+        => IBinaryReader.Defaults.ReadFixed32<SpanBinaryReader, T>(ref this);
     public bool TryReadFixed32<T>(out T result, out ParseStatus status)
         where T : struct
-        => BinaryReaderExtension.TryReadFixed32(ref this, out result, out status);
+        => IBinaryReader.Defaults.TryReadFixed32(ref this, out result, out status);
     public T ReadFixed64<T>()
         where T : struct
-        => BinaryReaderExtension.ReadFixed64<SpanBinaryReader, T>(ref this);
+        => IBinaryReader.Defaults.ReadFixed64<SpanBinaryReader, T>(ref this);
     public bool TryReadFixed64<T>(out T result, out ParseStatus status)
         where T : struct
-        => BinaryReaderExtension.TryReadFixed64(ref this, out result, out status);
+        => IBinaryReader.Defaults.TryReadFixed64(ref this, out result, out status);
     public T ReadVarInt<T>()
         where T : IBinaryInteger<T>
-        => BinaryReaderExtension.ReadVarInt<SpanBinaryReader, T>(ref this);
+        => IBinaryReader.Defaults.ReadVarInt<SpanBinaryReader, T>(ref this);
     public bool TryReadVarInt<T>(out T result, out ParseStatus status)
         where T : IBinaryInteger<T>
-        => BinaryReaderExtension.TryReadVarInt(ref this, out result, out status);
+        => IBinaryReader.Defaults.TryReadVarInt(ref this, out result, out status);
     public T ReadVarIntZigZag<T>()
         where T : IBinaryInteger<T>, ISignedNumber<T>
-        => BinaryReaderExtension.ReadVarIntZigZag<SpanBinaryReader, T>(ref this);
+        => IBinaryReader.Defaults.ReadVarIntZigZag<SpanBinaryReader, T>(ref this);
     public bool TryReadVarIntZigZag<T>(out T result, out ParseStatus status)
         where T : IBinaryInteger<T>, ISignedNumber<T>
-        => BinaryReaderExtension.TryReadVarIntZigZag(ref this, out result, out status);
+        => IBinaryReader.Defaults.TryReadVarIntZigZag(ref this, out result, out status);
     public bool ReadBool()
-        => BinaryReaderExtension.ReadBool(ref this);
+        => IBinaryReader.Defaults.ReadBool(ref this);
     public bool TryReadBool(out bool result, out ParseStatus status)
-        => BinaryReaderExtension.TryReadBool(ref this, out result, out status);
+        => IBinaryReader.Defaults.TryReadBool(ref this, out result, out status);
     public ReadOnlySpan<byte> ReadRawBlock(int length)
-        => BinaryReaderExtension.ReadRawBlock(ref this, length);
+        => IBinaryReader.Defaults.ReadRawBlock(ref this, length);
     public bool TryReadRawBlock(int length, out ReadOnlySpan<byte> block, out ParseStatus status)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(length);
@@ -90,7 +90,7 @@ public ref struct SpanBinaryReader(ReadOnlySpan<byte> bytes) : IStructBinaryRead
         return read;
     }
     public ReadOnlySpan<byte> ReadLengthDelimited()
-        => BinaryReaderExtension.ReadLengthDelimited(ref this);
+        => IBinaryReader.Defaults.ReadLengthDelimited(ref this);
     public bool TryReadLengthDelimited(out ReadOnlySpan<byte> result, out ParseStatus status)
     {
         if (TryReadVarInt(out long length, out status))
@@ -108,7 +108,7 @@ public ref struct SpanBinaryReader(ReadOnlySpan<byte> bytes) : IStructBinaryRead
         return false;
     }
     public void SkipLengthDelimited()
-        => BinaryReaderExtension.SkipLengthDelimited(ref this);
+        => IBinaryReader.Defaults.SkipLengthDelimited(ref this);
     public bool TryReadByteArray(out byte[] value, out ParseStatus status)
     {
         if (TryReadVarInt(out long length, out status))
@@ -138,7 +138,7 @@ public ref struct SpanBinaryReader(ReadOnlySpan<byte> bytes) : IStructBinaryRead
         return false;
     }
     public byte[] ReadByteArray()
-        => BinaryReaderExtension.ReadByteArray(ref this);
+        => IBinaryReader.Defaults.ReadByteArray(ref this);
     public void ReadByteArray(List<byte> destination)
     {
         destination.AddRange(ReadLengthDelimited());

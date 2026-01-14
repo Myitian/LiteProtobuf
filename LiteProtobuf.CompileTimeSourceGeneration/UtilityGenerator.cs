@@ -15,7 +15,6 @@ public class UtilityGenerator : IIncrementalGenerator
     public const string Global = "global::";
     public const string N_ReadRepeatedAttribute = $"{nameof(Templates.ReadRepeated)}Attribute";
     public const string N_WriteRepeatedAttribute = $"{nameof(Templates.WriteRepeated)}Attribute";
-    public const string N_ShadowVirtualMethodBodyToAttribute = $"{nameof(Templates.ShadowVirtualMethodBodyTo)}Attribute";
 
     public const string NS_Myitian = nameof(Myitian);
     public const string NS_Myitian_LiteProtobuf = $"{NS_Myitian}.{nameof(LiteProtobuf)}";
@@ -23,7 +22,6 @@ public class UtilityGenerator : IIncrementalGenerator
 
     public const string FQ_ReadRepeatedAttribute = $"{NS_Myitian_LiteProtobuf_CompileTimeSourceGeneration}.{N_ReadRepeatedAttribute}";
     public const string FQ_WriteRepeatedAttribute = $"{NS_Myitian_LiteProtobuf_CompileTimeSourceGeneration}.{N_WriteRepeatedAttribute}";
-    public const string FQ_ShadowVirtualMethodBodyToAttribute = $"{NS_Myitian_LiteProtobuf_CompileTimeSourceGeneration}.{N_ShadowVirtualMethodBodyToAttribute}";
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
@@ -44,12 +42,6 @@ public class UtilityGenerator : IIncrementalGenerator
             predicate: static (syntaxNode, _) => syntaxNode is MethodDeclarationSyntax,
             transform: static (context, _) => new Templates.WriteRepeated.Model(context))
             .Where(it => it.IsValid), Templates.WriteRepeated.Apply);
-
-        context.RegisterSourceOutput(context.SyntaxProvider.ForAttributeWithMetadataName(
-            fullyQualifiedMetadataName: FQ_ShadowVirtualMethodBodyToAttribute,
-            predicate: static (syntaxNode, _) => syntaxNode is InterfaceDeclarationSyntax,
-            transform: static (context, _) => new Templates.ShadowVirtualMethodBodyTo.Model(context))
-            .Where(it => it.IsValid), Templates.ShadowVirtualMethodBodyTo.Apply);
     }
 
     public static int CreateCSharpCode(StringBuilder sb, string usings, INamedTypeSymbol symbol)

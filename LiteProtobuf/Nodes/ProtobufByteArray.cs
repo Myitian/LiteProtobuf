@@ -81,7 +81,7 @@ public partial class ProtobufByteArray()
     }
     public override string ToString()
     {
-        return $"{{LengthDelimited, Length = {Data?.Length ?? 0}, {DisplayLimitedBytes(Data, 32)}}}";
+        return $"{{LengthDelimited, Length = {Data?.Length ?? 0}, {DisplayLimitedBytes(Data, 50)}}}";
     }
     public static string DisplayLimitedBytes(ReadOnlySpan<byte> bytes, int limit)
     {
