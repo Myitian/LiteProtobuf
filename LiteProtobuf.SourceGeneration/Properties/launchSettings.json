@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "配置文件 1": {
+    "LiteProtobuf SG": {
       "commandName": "DebugRoslynComponent",
       "targetProject": "..\\LiteProtobuf\\LiteProtobuf.csproj"
     }

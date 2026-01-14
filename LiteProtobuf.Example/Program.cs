@@ -32,7 +32,7 @@ class Program
 
             // If parsed correctly, the input and output should be consistent.
 
-            Console.WriteLine(root.ToString(null));
+            Console.WriteLine(root.ToFormattedString(null));
         }
         finally
         {

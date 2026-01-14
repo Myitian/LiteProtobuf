@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace Myitian.LiteProtobuf.CompileTimeSourceGeneration;
 
@@ -26,9 +27,10 @@ public class UtilityGenerator : IIncrementalGenerator
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
+        // new Thread(() => Thread.Sleep(100000)) { IsBackground = false }.Start(); // Keep console not to close
         context.RegisterPostInitializationOutput(static postInitializationContext =>
             postInitializationContext.AddSource(
-                $"Attributes.g.cs",
+                "Attributes.g.cs",
                 Templates.Attributes));
 
         context.RegisterSourceOutput(context.SyntaxProvider.ForAttributeWithMetadataName(

@@ -1,11 +1,13 @@
 ﻿using Myitian.LiteProtobuf.Serialization;
 using Myitian.LiteProtobuf.SourceGeneration;
-using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace Myitian.LiteProtobuf.Nodes;
 
+[DefaultTryCreateInstance(typeof(ProtobufByteArray))]
+[DefaultCreateInstance(typeof(ProtobufByteArray))]
 [DefaultTryCreateFulfilled(typeof(ProtobufByteArray))]
+[DefaultCreateFulfilled(typeof(ProtobufByteArray))]
 public partial class ProtobufByteArray()
     : ProtobufNode(WireType.LengthDelimited), IProtobufType<ProtobufByteArray>
 {
@@ -24,15 +26,15 @@ public partial class ProtobufByteArray()
             {
                 ParseStatus subStatus;
                 int nextRecursion = Math.Max(recursion, 0) - 1;
-                while (reader.TryReadTag(out int index, out WireType childWireType, out subStatus))
+                while (reader.TryReadTag(out FieldInfo fi, out subStatus))
                 {
-                    if (!TryCreateInstance(childWireType, out ProtobufNode? child))
+                    if (!TryCreateInstance(fi, null, out ProtobufNode? child))
                         return null;
-                    if (!child.TryReadProtobuf(ref reader, childWireType, out _))
+                    if (!child.TryReadProtobuf(ref reader, fi, null, out _))
                         return null;
                     if (recursion != 0)
                         child = child.Expand();
-                    result.Children.Add(new(index, child));
+                    result.Children.Add(new(fi.Index, child));
                 }
                 if (subStatus != ParseStatus.ExactEndOfStream)
                     return null;
@@ -44,19 +46,13 @@ public partial class ProtobufByteArray()
             }
         }
     }
-    public static bool TryCreateInstance(WireType wireType, [NotNullWhen(true)] out ProtobufByteArray? value)
+    public static new bool IsFieldInfoValid(FieldInfo fieldInfo, SerializationOptions? options)
     {
-        if (wireType is not WireType.LengthDelimited)
-        {
-            value = null;
-            return false;
-        }
-        value = new();
-        return true;
+        return fieldInfo.ReceivedWireType is WireType.LengthDelimited;
     }
-    protected override bool SharedTryReadProtobuf<TReader>(ref TReader reader, WireType receivedWireType, out ParseStatus status)
+    protected override bool SharedTryReadProtobuf<TReader>(ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
     {
-        if (receivedWireType is not WireType.LengthDelimited)
+        if (!IsFieldInfoValidForInstance(fieldInfo, options))
         {
             status = ParseStatus.InvalidData;
             return false;
@@ -73,20 +69,14 @@ public partial class ProtobufByteArray()
             return false;
         }
     }
-    protected override void SharedReadProtobuf<TReader>(ref TReader reader, WireType receivedWireType)
+    protected override void SharedReadProtobuf<TReader>(ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options)
     {
-        if (receivedWireType is not WireType.LengthDelimited)
+        if (!IsFieldInfoValidForInstance(fieldInfo, options))
             throw new InvalidDataException();
         Data = reader.ReadByteArray();
     }
-    public override void WriteProtobuf<TWriter>(ref TWriter writer, int index)
+    protected override void SharedWriteProtobuf<TWriter>(ref TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)
     {
-        writer.WriteTag(index, WireType.LengthDelimited);
-        writer.WriteLengthDelimited(Data);
-    }
-    public override void WriteProtobuf<TWriter>(TWriter writer, int index)
-    {
-        writer.WriteTag(index, WireType.LengthDelimited);
         writer.WriteLengthDelimited(Data);
     }
     public override string ToString()
@@ -95,8 +85,7 @@ public partial class ProtobufByteArray()
     }
     public static string DisplayLimitedBytes(ReadOnlySpan<byte> bytes, int limit)
     {
-        StringBuilder sb = new();
-        sb.Append("b\"");
+        StringBuilder sb = new("b\"");
         for (int i = 0; i < bytes.Length; i++)
         {
             if (i == limit)
@@ -150,19 +139,19 @@ public partial class ProtobufByteArray()
         {
             ParseStatus subStatus;
             int nextRecursion = Math.Max(recursion, 0) - 1;
-            while (ProtobufUtility.TryReadTag(ref reader, out int index, out WireType childWireType, out subStatus))
+            while (ProtobufUtility.TryReadTag(ref reader, out FieldInfo fi, out subStatus))
             {
-                if (!TryCreateInstance(childWireType, out ProtobufNode? child))
+                if (!TryCreateInstance(fi, null, out ProtobufNode? child))
                     return null;
-                if (!child.TryReadProtobuf(ref reader, childWireType, out _))
+                if (!child.TryReadProtobuf(ref reader, fi, null, out _))
                     return null;
                 if (recursion != 0 && child is ProtobufByteArray childLD)
                 {
-                    ProtobufMessage? childMSG = childLD.AsMessage(nextRecursion);
-                    if (childMSG is not null)
-                        child = childMSG;
+                    ProtobufMessage? childMessage = childLD.AsMessage(nextRecursion);
+                    if (childMessage is not null)
+                        child = childMessage;
                 }
-                result.Children.Add(new(index, child));
+                result.Children.Add(new(fi.Index, child));
             }
             if (subStatus != ParseStatus.ExactEndOfStream)
                 return null;

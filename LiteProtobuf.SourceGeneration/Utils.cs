@@ -13,6 +13,17 @@ public static class Utils
         miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
     public static readonly SymbolDisplayFormat NullableFullyQualifiedFormat = SymbolDisplayFormat.FullyQualifiedFormat
         .AddMiscellaneousOptions(SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier);
+    public static StringBuilder AppendClrName(this StringBuilder sb, ITypeSymbol symbol)
+    {
+        if (symbol.ContainingType != null)
+            sb.AppendClrName(symbol.ContainingType).Append('+');
+        else if (symbol.ContainingNamespace != null && !symbol.ContainingNamespace.IsGlobalNamespace)
+            sb.Append(symbol.ContainingNamespace.ToDisplayString()).Append('.');
+        sb.Append(symbol.Name);
+        if (symbol is INamedTypeSymbol namedType && namedType.Arity > 0)
+            sb.Append('`').Append(namedType.Arity);
+        return sb;
+    }
     public static int AppendCSharpCode(this StringBuilder sb, string usings, INamedTypeSymbol symbol)
     {
         int depth = 0;

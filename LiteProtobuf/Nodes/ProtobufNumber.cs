@@ -4,29 +4,36 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Myitian.LiteProtobuf.Nodes;
 
+[DefaultCreateInstance(typeof(ProtobufNumber))]
 [DefaultTryCreateFulfilled(typeof(ProtobufNumber))]
+[DefaultCreateFulfilled(typeof(ProtobufNumber))]
 public sealed partial class ProtobufNumber(WireType type, ulong value)
     : ProtobufNode(type), IProtobufType<ProtobufNumber>
 {
     public ulong Value { get; set; } = value;
-    public static bool TryCreateInstance(WireType wireType, [NotNullWhen(true)] out ProtobufNumber? value)
+
+    public static new bool IsFieldInfoValid(FieldInfo fieldInfo, SerializationOptions? options)
     {
-        if (wireType is not (WireType.VarInt or WireType.Fixed32 or WireType.Fixed64))
+        return fieldInfo.ReceivedWireType is WireType.VarInt or WireType.Fixed64 or WireType.Fixed32;
+    }
+    public static bool TryCreateInstance(FieldInfo fieldInfo, SerializationOptions? options, [NotNullWhen(true)] out ProtobufNumber? value)
+    {
+        if (!IsFieldInfoValid(fieldInfo, options))
         {
             value = null;
             return false;
         }
-        value = new(wireType, 0);
+        value = new(fieldInfo.ReceivedWireType, 0);
         return true;
     }
-    protected override bool SharedTryReadProtobuf<TReader>(ref TReader reader, WireType receivedWireType, out ParseStatus status)
+    protected override bool SharedTryReadProtobuf<TReader>(ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
     {
-        if (receivedWireType != Type)
+        if (!IsFieldInfoValid(fieldInfo, options))
         {
             status = ParseStatus.InvalidData;
             return false;
         }
-        switch (receivedWireType)
+        switch (fieldInfo.ReceivedWireType)
         {
             case WireType.VarInt when reader.TryReadVarInt(out ulong u, out status):
                 Value = u;
@@ -42,9 +49,9 @@ public sealed partial class ProtobufNumber(WireType type, ulong value)
                 return false;
         }
     }
-    protected override void SharedReadProtobuf<TReader>(ref TReader reader, WireType receivedWireType)
+    protected override void SharedReadProtobuf<TReader>(ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options)
     {
-        Value = receivedWireType switch
+        Value = fieldInfo.ReceivedWireType switch
         {
             WireType.VarInt => reader.ReadVarInt<ulong>(),
             WireType.Fixed64 => reader.ReadFixed64<ulong>(),
@@ -52,8 +59,7 @@ public sealed partial class ProtobufNumber(WireType type, ulong value)
             _ => throw new InvalidDataException(),
         };
     }
-    private void SharedWriteProtobuf<TWriter>(ref TWriter writer, int index)
-         where TWriter : IBinaryWriter, allows ref struct
+    protected override void SharedWriteProtobuf<TWriter>(ref TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)
     {
         switch (Type)
         {
@@ -70,18 +76,16 @@ public sealed partial class ProtobufNumber(WireType type, ulong value)
                 throw new NotSupportedException();
         }
     }
-    public override void WriteProtobuf<TWriter>(ref TWriter writer, int index)
-    {
-        writer.WriteTag(index, Type);
-        SharedWriteProtobuf(ref writer, index);
-    }
-    public override void WriteProtobuf<TWriter>(TWriter writer, int index)
-    {
-        writer.WriteTag(index, Type);
-        SharedWriteProtobuf(ref writer, index);
-    }
     public override string ToString()
     {
-        return $"{{Number, Type = {Type}, Value = {Value}}}";
+        switch (Type)
+        {
+            case WireType.Fixed32:
+                return $"{{Number, Type = {Type}, Value = {Value} (as Single = {(BitConverter.UInt32BitsToSingle((uint)Value))})}}";
+            case WireType.Fixed64:
+                return $"{{Number, Type = {Type}, Value = {Value} (as Double = {(BitConverter.UInt64BitsToDouble(Value))})}}";
+            default:
+                return $"{{Number, Type = {Type}, Value = {Value} (as ZigZag = {ProtobufUtility.DecodeZigZag((long)Value)})}}";
+        }
     }
 }

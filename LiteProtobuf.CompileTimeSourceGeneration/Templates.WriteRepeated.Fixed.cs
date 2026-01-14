@@ -26,8 +26,13 @@ public partial class Templates
                             case RepeatedEncoding.Auto:
                                 if (value.TryGetNonEnumeratedCount(out count))
                                     goto case RepeatedEncoding.Packed;
-                                else
+                                else if (value is not IReadOnlyCollection<{1}> ro)
                                     goto case RepeatedEncoding.NonPacked;
+                                else
+                                {{
+                                    count = ro.Count;
+                                    goto case RepeatedEncoding.Packed;
+                                }}
                             case RepeatedEncoding.Packed when count < 0:
                                 count = value.Count();
                                 goto case RepeatedEncoding.Packed;
@@ -36,7 +41,7 @@ public partial class Templates
                 
                 """;
             public string Common => """
-                                WriteTag({0}writer, index, WireType.LengthDelimited);
+                                writer.WriteTag(index, WireType.LengthDelimited);
                                 writer.WriteVarInt(totalSize);
                                 foreach ({1} it in value)
                                     writer.Write{2}(it);
@@ -44,7 +49,7 @@ public partial class Templates
                             case RepeatedEncoding.NonPacked:
                                 foreach ({1} it in value)
                                 {{
-                                    WriteTag({0}writer, index, WireType.{2});
+                                    writer.WriteTag(index, WireType.{2});
                                     writer.Write{2}(it);
                                 }}
                                 break;

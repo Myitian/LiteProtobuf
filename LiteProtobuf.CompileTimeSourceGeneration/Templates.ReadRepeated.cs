@@ -15,10 +15,10 @@ public partial class Templates
             string wireType = model.Mode == "VarIntZigZag" ? "VarInt" : model.Mode;
             sb.AppendFormat(Common,
                 model.Mode, wireType,
-                model.IsValueType ? "ref " : "",
-                model.IsValueType ? "" : "?");
+                model.IsReaderValueType ? "ref " : "",
+                model.IsReaderValueType ? "" : "?");
             string code = sb.Append(ProtobufUtilityFooter).ToString();
-            context.AddSource($"ProtobufUtility.{model.Name}.{(model.IsValueType ? 'V' : 'C')}.g.cs", code);
+            context.AddSource($"ProtobufUtility.{model.Name}.{(model.IsReaderValueType ? 'V' : 'C')}{model.ExtraName}.g.cs", code);
         }
 
         public const string Common = """
@@ -59,7 +59,8 @@ public partial class Templates
             public string Mode { get; } = "";
             public string Name { get; } = "";
             public string Sign { get; } = "";
-            public bool IsValueType { get; } = false;
+            public bool IsReaderValueType { get; } = false;
+            public string ExtraName { get; } = "";
 
             public Model(GeneratorAttributeSyntaxContext context)
             {
@@ -74,14 +75,18 @@ public partial class Templates
                         {
                             Kind: TypedConstantKind.Primitive,
                             Value: bool isValueType
-                        }]
+                        },
+                        {
+                            Kind: TypedConstantKind.Primitive
+                        } extraName]
                     }])
                     return;
 
                 Mode = mode;
                 Name = m.Identifier.Text;
                 Sign = SemicolonRemover.Instance.Visit(m).ToString();
-                IsValueType = isValueType;
+                ExtraName = extraName.Value as string ?? "";
+                IsReaderValueType = isValueType;
                 IsValid = true;
             }
         }

@@ -24,3 +24,16 @@ public enum FieldType
     RepeatedFixed64 = Repeated | Fixed64,
     RepeatedLengthDelimited = Repeated | LengthDelimited,
 }
+public static class FieldTypeExtension
+{
+    public static RepeatedEncoding GetRepeatedEncoding(this FieldType type)
+    {
+        const FieldType mask = FieldType.Packed | FieldType.NonPacked;
+        return (type & mask) switch
+        {
+            FieldType.Packed => RepeatedEncoding.Packed,
+            FieldType.NonPacked => RepeatedEncoding.NonPacked,
+            _ => RepeatedEncoding.Auto,
+        };
+    }
+}

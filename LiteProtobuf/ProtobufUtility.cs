@@ -1,4 +1,5 @@
 using Myitian.LiteProtobuf.CompileTimeSourceGeneration;
+using Myitian.LiteProtobuf.Serialization;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -46,6 +47,12 @@ public static partial class ProtobufUtility
         wireType = default;
         return false;
     }
+    public static bool TryReadTag<TReader>(this scoped ref TReader reader, out FieldInfo fieldInfo, out ParseStatus status)
+        where TReader : struct, IBinaryReader, allows ref struct
+    {
+        fieldInfo = new();
+        return reader.TryReadTag(out fieldInfo.Index, out fieldInfo.ReceivedWireType, out status);
+    }
     public static bool TryReadTag<TReader>(this TReader reader, out int index, out WireType wireType, out ParseStatus status)
         where TReader : class, IBinaryReader
     {
@@ -58,6 +65,12 @@ public static partial class ProtobufUtility
         index = default;
         wireType = default;
         return false;
+    }
+    public static bool TryReadTag<TReader>(this TReader reader, out FieldInfo fieldInfo, out ParseStatus status)
+        where TReader : class, IBinaryReader
+    {
+        fieldInfo = new();
+        return reader.TryReadTag(out fieldInfo.Index, out fieldInfo.ReceivedWireType, out status);
     }
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static T EncodeZigZag<T>(T value)
@@ -194,51 +207,42 @@ public static partial class ProtobufUtility
         where TWriter : class, IBinaryWriter;
 
     [ReadRepeated(nameof(RepeatedItemType.VarInt), true)]
-    public static partial bool ReadRepeatedVarInt<T, TCollection, TReader>(scoped ref TReader reader, WireType wireType, TCollection destination, out ParseStatus status)
+    public static partial bool ReadRepeatedVarInt<T, TReader>(scoped ref TReader reader, WireType wireType, ICollection<T> destination, out ParseStatus status)
         where T : IBinaryInteger<T>
-        where TCollection : ICollection<T>, allows ref struct
         where TReader : struct, IStructBinaryReader<TReader>, allows ref struct;
     [ReadRepeated(nameof(RepeatedItemType.VarInt), false)]
-    public static partial bool ReadRepeatedVarInt<T, TCollection, TReader>(TReader reader, WireType wireType, TCollection destination, out ParseStatus status)
+    public static partial bool ReadRepeatedVarInt<T, TReader>(TReader reader, WireType wireType, ICollection<T> destination, out ParseStatus status)
         where T : IBinaryInteger<T>
-        where TCollection : ICollection<T>, allows ref struct
         where TReader : class, IClassBinaryReader<TReader>;
 
     [ReadRepeated(nameof(RepeatedItemType.VarIntZigZag), true)]
-    public static partial bool ReadRepeatedVarIntZigZag<T, TCollection, TReader>(scoped ref TReader reader, WireType wireType, TCollection destination, out ParseStatus status)
+    public static partial bool ReadRepeatedVarIntZigZag<T, TReader>(scoped ref TReader reader, WireType wireType, ICollection<T> destination, out ParseStatus status)
         where T : IBinaryInteger<T>, ISignedNumber<T>
-        where TCollection : ICollection<T>, allows ref struct
         where TReader : struct, IStructBinaryReader<TReader>, allows ref struct;
     [ReadRepeated(nameof(RepeatedItemType.VarIntZigZag), false)]
-    public static partial bool ReadRepeatedVarIntZigZag<T, TCollection, TReader>(TReader reader, WireType wireType, TCollection destination, out ParseStatus status)
+    public static partial bool ReadRepeatedVarIntZigZag<T, TReader>(TReader reader, WireType wireType, ICollection<T> destination, out ParseStatus status)
         where T : IBinaryInteger<T>, ISignedNumber<T>
-        where TCollection : ICollection<T>, allows ref struct
         where TReader : class, IClassBinaryReader<TReader>;
 
     [ReadRepeated(nameof(RepeatedItemType.Fixed32), true)]
-    public static partial bool ReadRepeatedFixed32<T, TCollection, TReader>(scoped ref TReader reader, WireType wireType, TCollection destination, out ParseStatus status)
+    public static partial bool ReadRepeatedFixed32<T, TReader>(scoped ref TReader reader, WireType wireType, ICollection<T> destination, out ParseStatus status)
         where T : struct
-        where TCollection : ICollection<T>, allows ref struct
         where TReader : struct, IStructBinaryReader<TReader>, allows ref struct;
     [ReadRepeated(nameof(RepeatedItemType.Fixed32), false)]
-    public static partial bool ReadRepeatedFixed32<T, TCollection, TReader>(TReader reader, WireType wireType, TCollection destination, out ParseStatus status)
+    public static partial bool ReadRepeatedFixed32<T, TReader>(TReader reader, WireType wireType, ICollection<T> destination, out ParseStatus status)
         where T : struct
-        where TCollection : ICollection<T>, allows ref struct
         where TReader : class, IClassBinaryReader<TReader>;
 
     [ReadRepeated(nameof(RepeatedItemType.Fixed64), true)]
-    public static partial bool ReadRepeatedFixed64<T, TCollection, TReader>(scoped ref TReader reader, WireType wireType, TCollection destination, out ParseStatus status)
+    public static partial bool ReadRepeatedFixed64<T, TReader>(scoped ref TReader reader, WireType wireType, ICollection<T> destination, out ParseStatus status)
         where T : struct
-        where TCollection : ICollection<T>, allows ref struct
         where TReader : struct, IStructBinaryReader<TReader>, allows ref struct;
     [ReadRepeated(nameof(RepeatedItemType.Fixed64), false)]
-    public static partial bool ReadRepeatedFixed64<T, TCollection, TReader>(TReader reader, WireType wireType, TCollection destination, out ParseStatus status)
+    public static partial bool ReadRepeatedFixed64<T, TReader>(TReader reader, WireType wireType, ICollection<T> destination, out ParseStatus status)
         where T : struct
-        where TCollection : ICollection<T>, allows ref struct
         where TReader : class, IClassBinaryReader<TReader>;
 
-    public static bool ReadRepeatedBool<TCollection, TReader>(scoped ref TReader reader, WireType wireType, TCollection destination, out ParseStatus status)
-        where TCollection : ICollection<bool>, allows ref struct
+    public static bool TryReadRepeatedBool<TReader>(scoped ref TReader reader, WireType wireType, ICollection<bool> destination, out ParseStatus status)
         where TReader : struct, IStructBinaryReader<TReader>, allows ref struct
     {
         switch (wireType)
@@ -268,8 +272,7 @@ public static partial class ProtobufUtility
                 return false;
         }
     }
-    public static bool ReadRepeatedBool<TCollection, TReader>(TReader reader, WireType wireType, TCollection destination, out ParseStatus status)
-        where TCollection : ICollection<bool>, allows ref struct
+    public static bool TryReadRepeatedBool<TReader>(TReader reader, WireType wireType, ICollection<bool> destination, out ParseStatus status)
         where TReader : class, IClassBinaryReader<TReader>
     {
         switch (wireType)

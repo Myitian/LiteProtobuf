@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "配置文件 1": {
+    "LiteProtobuf CTSG": {
       "commandName": "DebugRoslynComponent",
       "targetProject": "..\\LiteProtobuf\\LiteProtobuf.csproj"
     }

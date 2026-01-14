@@ -1,9 +1,9 @@
 namespace Myitian.LiteProtobuf;
 
-public class LengthLimitedStream(Stream stream, long length, bool leaveOpen = true) : Stream
+public sealed class LengthLimitedStream(Stream stream, ulong length, bool leaveOpen = true) : Stream
 {
-    protected long _remaining = length;
-    protected readonly bool _leaveOpen = leaveOpen;
+    private ulong _remaining = length;
+    private readonly bool _leaveOpen = leaveOpen;
     public Stream BaseStream { get; } = stream;
     public override bool CanRead => BaseStream.CanRead;
     public override bool CanSeek => false;
@@ -15,25 +15,10 @@ public class LengthLimitedStream(Stream stream, long length, bool leaveOpen = tr
         set => throw new NotSupportedException();
     }
 
-    public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback? callback, object? state)
-    {
-        long c = Math.Min(count, _remaining);
-        IAsyncResult result = BaseStream.BeginRead(buffer, offset, (int)c, callback, state);
-        _remaining -= c;
-        return result;
-    }
     public override void Close()
     {
-        BaseStream.Close();
-    }
-    public override ValueTask DisposeAsync()
-    {
-        GC.SuppressFinalize(this);
-        return BaseStream.DisposeAsync();
-    }
-    public override int EndRead(IAsyncResult asyncResult)
-    {
-        return BaseStream.EndRead(asyncResult);
+        if (!_leaveOpen)
+            BaseStream.Close();
     }
     public override void Flush()
     {
@@ -45,30 +30,50 @@ public class LengthLimitedStream(Stream stream, long length, bool leaveOpen = tr
     }
     public override int Read(byte[] buffer, int offset, int count)
     {
-        long c = Math.Min(count, _remaining);
+        ValidateBufferArguments(buffer, offset, count);
+        ulong c = Math.Min((ulong)count, _remaining);
         int result = BaseStream.Read(buffer, offset, (int)c);
-        _remaining -= c;
+        _remaining -= (uint)result;
         return result;
     }
     public override int Read(Span<byte> buffer)
     {
-        long c = Math.Min(buffer.Length, _remaining);
+        ulong c = Math.Min((ulong)buffer.Length, _remaining);
+        if (c == 0)
+            return 0;
         int result = BaseStream.Read(buffer[..(int)c]);
-        _remaining -= c;
+        _remaining = Math.Min(_remaining - (uint)result, 0);
         return result;
     }
     public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
     {
-        long c = Math.Min(count, _remaining);
-        Task<int> result = BaseStream.ReadAsync(buffer, offset, (int)c, cancellationToken);
-        _remaining -= c;
-        return result;
+        if (cancellationToken.IsCancellationRequested)
+            return Task.FromCanceled<int>(cancellationToken);
+        try
+        {
+            ValidateBufferArguments(buffer, offset, count);
+            ulong c = Math.Min((ulong)count, _remaining);
+            if (c == 0)
+                return Task.FromResult(0);
+            return BaseStream.ReadAsync(buffer, offset, (int)c, cancellationToken).ContinueWith(task =>
+            {
+                int result = task.Result;
+                _remaining = Math.Min(_remaining - (uint)result, 0);
+                return result;
+            });
+        }
+        catch (Exception ex)
+        {
+            return Task.FromException<int>(ex);
+        }
     }
-    public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
+    public override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
     {
-        long c = Math.Min(buffer.Length, _remaining);
-        ValueTask<int> result = BaseStream.ReadAsync(buffer[..(int)c], cancellationToken);
-        _remaining -= c;
+        ulong c = Math.Min((ulong)buffer.Length, _remaining);
+        if (c == 0)
+            return 0;
+        int result = await BaseStream.ReadAsync(buffer[..(int)c], cancellationToken);
+        _remaining = Math.Min(_remaining - (uint)result, 0);
         return result;
     }
     public override int ReadByte()

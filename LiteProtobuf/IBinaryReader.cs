@@ -17,10 +17,17 @@ public interface IBinaryReader : IDisposable
         return status switch
         {
             ParseStatus.Success => value,
-            ParseStatus.ExactEndOfStream or ParseStatus.EndOfStream => throw new EndOfStreamException(),
-            ParseStatus.InvalidData => throw new InvalidDataException(),
-            ParseStatus.NotSupported => throw new NotSupportedException(),
-            _ => throw new Exception(status.ToString())
+            _ => throw GetExceptionByStatus(status)
+        };
+    }
+    public static Exception GetExceptionByStatus(ParseStatus status)
+    {
+        throw status switch
+        {
+            ParseStatus.ExactEndOfStream or ParseStatus.EndOfStream => new EndOfStreamException(),
+            ParseStatus.InvalidData => new InvalidDataException(),
+            ParseStatus.NotSupported => new NotSupportedException(),
+            _ => new Exception(status.ToString())
         };
     }
     public virtual byte ReadByte()

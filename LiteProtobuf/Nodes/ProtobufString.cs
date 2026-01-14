@@ -1,28 +1,25 @@
 ﻿using Myitian.LiteProtobuf.Serialization;
 using Myitian.LiteProtobuf.SourceGeneration;
-using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace Myitian.LiteProtobuf.Nodes;
 
+[DefaultTryCreateInstance(typeof(ProtobufString))]
+[DefaultCreateInstance(typeof(ProtobufString))]
 [DefaultTryCreateFulfilled(typeof(ProtobufString))]
+[DefaultCreateFulfilled(typeof(ProtobufString))]
 public sealed partial class ProtobufString()
     : ProtobufNode(WireType.LengthDelimited), IProtobufType<ProtobufString>
 {
     public string? Value { get; set; }
-    public static bool TryCreateInstance(WireType wireType, [NotNullWhen(true)] out ProtobufString? value)
+
+    public static new bool IsFieldInfoValid(FieldInfo fieldInfo, SerializationOptions? options)
     {
-        if (wireType is not WireType.LengthDelimited)
-        {
-            value = null;
-            return false;
-        }
-        value = new();
-        return true;
+        return fieldInfo.ReceivedWireType is WireType.LengthDelimited;
     }
-    protected override bool SharedTryReadProtobuf<TReader>(ref TReader reader, WireType receivedWireType, out ParseStatus status)
+    protected override bool SharedTryReadProtobuf<TReader>(ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
     {
-        if (receivedWireType is not WireType.LengthDelimited)
+        if (!IsFieldInfoValid(fieldInfo, options))
         {
             status = ParseStatus.InvalidData;
             return false;
@@ -44,20 +41,14 @@ public sealed partial class ProtobufString()
             return false;
         }
     }
-    protected override void SharedReadProtobuf<TReader>(ref TReader reader, WireType receivedWireType)
+    protected override void SharedReadProtobuf<TReader>(ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options)
     {
-        if (receivedWireType is not WireType.LengthDelimited)
+        if (!IsFieldInfoValid(fieldInfo, options))
             throw new InvalidDataException();
         Value = reader.ReadString();
     }
-    public override void WriteProtobuf<TWriter>(ref TWriter writer, int index)
+    protected override void SharedWriteProtobuf<TWriter>(ref TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)
     {
-        writer.WriteTag(index, WireType.LengthDelimited);
-        writer.WriteString(Value);
-    }
-    public override void WriteProtobuf<TWriter>(TWriter writer, int index)
-    {
-        writer.WriteTag(index, WireType.LengthDelimited);
         writer.WriteString(Value);
     }
     public override string ToString()
@@ -67,7 +58,7 @@ public sealed partial class ProtobufString()
     public static string DisplayLimitedChars(ReadOnlySpan<char> chars, int limit)
     {
         StringBuilder sb = new();
-        sb.Append("b\"");
+        sb.Append('"');
         for (int i = 0; i < chars.Length; i++)
         {
             if (i == limit)
