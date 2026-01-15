@@ -7,10 +7,7 @@ namespace Myitian.LiteProtobuf.SourceGeneration;
 internal class MainGenerator : IIncrementalGenerator
 {
     public const string Global = "global::";
-    public const string N_DefaultTryCreateInstanceAttribute = $"Default{nameof(Defaults.TryCreateInstance)}{nameof(Attribute)}";
-    public const string N_DefaultCreateInstanceAttribute = $"Default{nameof(Defaults.CreateInstance)}{nameof(Attribute)}";
-    public const string N_DefaultTryCreateFulfilledAttribute = $"Default{nameof(Defaults.TryCreateFulfilled)}{nameof(Attribute)}";
-    public const string N_DefaultCreateFulfilledAttribute = $"Default{nameof(Defaults.CreateFulfilled)}{nameof(Attribute)}";
+    public const string N_GeneratedDefaultImplementationAttribute = $"{nameof(GeneratedDefaultImplementation)}{nameof(Attribute)}";
     public const string N_GeneratedProtobufTypeSerializerAttribute = $"{nameof(GeneratedProtobufTypeSerializer)}{nameof(Attribute)}";
     public const string N_ProtobufFieldAttribute = $"ProtobufField{nameof(Attribute)}";
 
@@ -22,10 +19,7 @@ internal class MainGenerator : IIncrementalGenerator
     public const string NS_System_Diagnostics = $"{NS_System}.{nameof(System.Diagnostics)}";
     public const string NS_System_Diagnostics_CodeAnalysis = $"{NS_System_Diagnostics}.{nameof(System.Diagnostics.CodeAnalysis)}";
 
-    public const string FQ_DefaultTryCreateInstanceAttribute = $"{NS_Myitian_LiteProtobuf_SourceGeneration}.{N_DefaultTryCreateInstanceAttribute}";
-    public const string FQ_DefaultCreateInstanceAttribute = $"{NS_Myitian_LiteProtobuf_SourceGeneration}.{N_DefaultCreateInstanceAttribute}";
-    public const string FQ_DefaultTryCreateFulfilledAttribute = $"{NS_Myitian_LiteProtobuf_SourceGeneration}.{N_DefaultTryCreateFulfilledAttribute}";
-    public const string FQ_DefaultCreateFulfilledAttribute = $"{NS_Myitian_LiteProtobuf_SourceGeneration}.{N_DefaultCreateFulfilledAttribute}";
+    public const string FQ_GeneratedDefaultImplementationAttribute = $"{NS_Myitian_LiteProtobuf_SourceGeneration}.{N_GeneratedDefaultImplementationAttribute}";
     public const string FQ_GeneratedProtobufTypeSerializerAttribute = $"{NS_Myitian_LiteProtobuf_SourceGeneration}.{N_GeneratedProtobufTypeSerializerAttribute}";
     public const string FQ_ProtobufFieldAttribute = $"{NS_Myitian_LiteProtobuf_SourceGeneration}.{N_ProtobufFieldAttribute}";
 
@@ -40,10 +34,7 @@ internal class MainGenerator : IIncrementalGenerator
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         // new System.Threading.Thread(() => System.Threading.Thread.Sleep(100000)) { IsBackground = false }.Start(); // Keep console not to close
-        Defaults.RegisterSourceOutput(context, Defaults.TryCreateInstance.Instance);
-        Defaults.RegisterSourceOutput(context, Defaults.CreateInstance.Instance);
-        Defaults.RegisterSourceOutput(context, Defaults.TryCreateFulfilled.Instance);
-        Defaults.RegisterSourceOutput(context, Defaults.CreateFulfilled.Instance);
+        GeneratedDefaultImplementation.RegisterSourceOutput(context);
         GeneratedProtobufTypeSerializer.RegisterSourceOutput(context);
     }
 }

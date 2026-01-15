@@ -4,12 +4,13 @@ using System.Text;
 
 namespace Myitian.LiteProtobuf.Nodes;
 
-[DefaultTryCreateInstance]
-[DefaultCreateInstance]
-[DefaultTryCreateFulfilled]
-[DefaultCreateFulfilled]
+[GeneratedDefaultImplementation(
+    TryCreateInstance = true,
+    CreateInstance = true,
+    TryCreateFulfilled = true,
+    CreateFulfilled = true)]
 public sealed partial class ProtobufMessage()
-    : ProtobufNode(WireType.LengthDelimited), IProtobufType<ProtobufMessage>
+    : ProtobufNode(WireType.LengthDelimited), IProtobufType<ProtobufMessage>, IProtobufFieldCollection
 {
     public List<KeyValuePair<int, ProtobufNode>> Children { get; } = [];
 
@@ -53,25 +54,41 @@ public sealed partial class ProtobufMessage()
         }
         try
         {
-            Children.Clear();
-            ParseStatus subStatus;
-            while (subReader.TryReadTag(out fieldInfo, out subStatus))
-            {
-                if (!TryCreateInstance(fieldInfo, options, out ProtobufNode? child)
-                    || !child.TryReadProtobuf(ref subReader, fieldInfo, options, out subStatus))
-                {
-                    status = ParseStatus.InvalidData;
-                    return false;
-                }
-                Children.Add(new(fieldInfo.Number, child));
-            }
-            status = subStatus == ParseStatus.ExactEndOfStream ? ParseStatus.Success : ParseStatus.InvalidData;
-            return true;
+            return TryReadProtobufBody(ref subReader, options, out status);
         }
         finally
         {
             subReader.Dispose();
         }
+    }
+    public bool TryReadProtobufBody<TReader>(scoped ref TReader reader, SerializationOptions? options, out ParseStatus status)
+        where TReader : struct, IStructBinaryReader<TReader>, allows ref struct
+    {
+        Children.Clear();
+        ParseStatus subStatus;
+        while (reader.TryReadTag(out FieldInfo fi, out subStatus))
+        {
+            if (!TryAddProtobufField(ref reader, fi, options, out _))
+            {
+                status = ParseStatus.InvalidData;
+                return false;
+            }
+        }
+        status = subStatus == ParseStatus.ExactEndOfStream ? ParseStatus.Success : ParseStatus.InvalidData;
+        return true;
+    }
+    public bool TryAddProtobufField<TReader>(scoped ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
+        where TReader : struct, IStructBinaryReader<TReader>, allows ref struct
+    {
+        if (!TryCreateInstance(fieldInfo, options, out ProtobufNode? child))
+        {
+            status = ParseStatus.InvalidData;
+            return false;
+        }
+        if (!child.TryReadProtobuf(ref reader, fieldInfo, options, out status))
+            return false;
+        Children.Add(new(fieldInfo.Number, child));
+        return true;
     }
     public override bool TryReadProtobuf<TReader>(TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
     {
@@ -85,23 +102,43 @@ public sealed partial class ProtobufMessage()
             subReader?.Dispose();
             return false;
         }
-        using (subReader)
+        try
         {
-            Children.Clear();
-            ParseStatus subStatus;
-            while (subReader.TryReadTag(out fieldInfo, out subStatus))
-            {
-                if (!TryCreateInstance(fieldInfo, options, out ProtobufNode? child)
-                    || !child.TryReadProtobuf(subReader, fieldInfo, options, out subStatus))
-                {
-                    status = ParseStatus.InvalidData;
-                    return false;
-                }
-                Children.Add(new(fieldInfo.Number, child));
-            }
-            status = subStatus == ParseStatus.ExactEndOfStream ? ParseStatus.Success : ParseStatus.InvalidData;
-            return true;
+            return TryReadProtobufBody(subReader, options, out status);
         }
+        finally
+        {
+            subReader.Dispose();
+        }
+    }
+    public bool TryReadProtobufBody<TReader>(TReader reader, SerializationOptions? options, out ParseStatus status)
+        where TReader : class, IClassBinaryReader<TReader>
+    {
+        Children.Clear();
+        ParseStatus subStatus;
+        while (reader.TryReadTag(out FieldInfo fi, out subStatus))
+        {
+            if (!TryAddProtobufField(reader, fi, options, out _))
+            {
+                status = ParseStatus.InvalidData;
+                return false;
+            }
+        }
+        status = subStatus == ParseStatus.ExactEndOfStream ? ParseStatus.Success : ParseStatus.InvalidData;
+        return true;
+    }
+    public bool TryAddProtobufField<TReader>(TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
+        where TReader : class, IClassBinaryReader<TReader>
+    {
+        if (!TryCreateInstance(fieldInfo, options, out ProtobufNode? child))
+        {
+            status = ParseStatus.InvalidData;
+            return false;
+        }
+        if (!child.TryReadProtobuf(reader, fieldInfo, options, out status))
+            return false;
+        Children.Add(new(fieldInfo.Number, child));
+        return true;
     }
     public override void ReadProtobuf<TReader>(scoped ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options)
     {
@@ -110,48 +147,53 @@ public sealed partial class ProtobufMessage()
         TReader subReader = TReader.CreateLengthDelimitedReader(ref reader);
         try
         {
-            ReadProtobufBody(ref subReader);
+            ReadProtobufBody(ref subReader, options);
         }
         finally
         {
             subReader.Dispose();
         }
     }
+    public void ReadProtobufBody<TReader>(scoped ref TReader subReader, SerializationOptions? options)
+        where TReader : struct, IStructBinaryReader<TReader>, allows ref struct
+    {
+        ParseStatus subStatus;
+        while (subReader.TryReadTag(out FieldInfo fi, out subStatus))
+            AddProtobufField(ref subReader, fi, options);
+        if (subStatus != ParseStatus.ExactEndOfStream)
+            throw new InvalidDataException();
+    }
+    public void AddProtobufField<TReader>(scoped ref TReader subReader, FieldInfo fieldInfo, SerializationOptions? options)
+        where TReader : struct, IStructBinaryReader<TReader>, allows ref struct
+    {
+        if (!TryCreateInstance(fieldInfo, options, out ProtobufNode? child))
+            throw new InvalidDataException($"Invalid data: {fieldInfo}");
+        child.ReadProtobuf(ref subReader, fieldInfo, options);
+        Children.Add(new(fieldInfo.Number, child));
+    }
     public override void ReadProtobuf<TReader>(TReader reader, FieldInfo fieldInfo, SerializationOptions? options)
     {
         if (!IsFieldInfoValidForInstance(fieldInfo, options))
             throw new InvalidDataException();
         using TReader subReader = TReader.CreateLengthDelimitedReader(reader);
-        ReadProtobufBody(subReader);
+        ReadProtobufBody(subReader, options);
     }
-    public void ReadProtobufBody<TReader>(scoped ref TReader subReader)
-        where TReader : struct, IStructBinaryReader<TReader>, allows ref struct
-    {
-        ParseStatus subStatus;
-        while (subReader.TryReadTag(out FieldInfo fi, out subStatus))
-        {
-            if (!TryCreateInstance(fi, null, out ProtobufNode? child))
-                throw new InvalidDataException($"Invalid wire type: {fi}");
-            child.ReadProtobuf(ref subReader, fi, null);
-            Children.Add(new(fi.Number, child));
-        }
-        if (subStatus != ParseStatus.ExactEndOfStream)
-            throw new InvalidDataException();
-    }
-
-    public void ReadProtobufBody<TReader>(TReader subReader)
+    public void ReadProtobufBody<TReader>(TReader subReader, SerializationOptions? options)
         where TReader : class, IClassBinaryReader<TReader>
     {
         ParseStatus subStatus;
         while (subReader.TryReadTag(out FieldInfo fi, out subStatus))
-        {
-            if (!TryCreateInstance(fi, null, out ProtobufNode? child))
-                throw new InvalidDataException($"Invalid data: {fi}");
-            child.ReadProtobuf(subReader, fi, null);
-            Children.Add(new(fi.Number, child));
-        }
+            AddProtobufField(subReader, fi, options);
         if (subStatus != ParseStatus.ExactEndOfStream)
             throw new InvalidDataException();
+    }
+    public void AddProtobufField<TReader>(TReader subReader, FieldInfo fieldInfo, SerializationOptions? options)
+        where TReader : class, IClassBinaryReader<TReader>
+    {
+        if (!TryCreateInstance(fieldInfo, options, out ProtobufNode? child))
+            throw new InvalidDataException($"Invalid data: {fieldInfo}");
+        child.ReadProtobuf(subReader, fieldInfo, options);
+        Children.Add(new(fieldInfo.Number, child));
     }
     public override void WriteProtobuf<TWriter>(scoped ref TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)
     {

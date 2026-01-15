@@ -1,4 +1,3 @@
-using Myitian.LiteProtobuf.CompileTimeSourceGeneration;
 using Myitian.LiteProtobuf.Serialization;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -125,181 +124,16 @@ public static partial class ProtobufUtility
         return result;
     }
 
-    [WriteRepeated(nameof(RepeatedItemType.VarInt), true)]
-    public static partial void WriteRepeatedVarInt<T, TWriter>(scoped ref TWriter writer, int number, ReadOnlySpan<T> value, RepeatedEncoding repeatedEncoding = RepeatedEncoding.Auto)
-        where T : IBinaryInteger<T>
-        where TWriter : struct, IBinaryWriter, allows ref struct;
-    [WriteRepeated(nameof(RepeatedItemType.VarInt), true)]
-    public static partial void WriteRepeatedVarInt<T, TWriter>(scoped ref TWriter writer, int number, IEnumerable<T> value, RepeatedEncoding repeatedEncoding = RepeatedEncoding.Auto)
-        where T : IBinaryInteger<T>
-        where TWriter : struct, IBinaryWriter, allows ref struct;
-    [WriteRepeated(nameof(RepeatedItemType.VarInt), false)]
-    public static partial void WriteRepeatedVarInt<T, TWriter>(TWriter writer, int number, ReadOnlySpan<T> value, RepeatedEncoding repeatedEncoding = RepeatedEncoding.Auto)
-        where T : IBinaryInteger<T>
-        where TWriter : class, IBinaryWriter;
-    [WriteRepeated(nameof(RepeatedItemType.VarInt), false)]
-    public static partial void WriteRepeatedVarInt<T, TWriter>(TWriter writer, int number, IEnumerable<T> value, RepeatedEncoding repeatedEncoding = RepeatedEncoding.Auto)
-        where T : IBinaryInteger<T>
-        where TWriter : class, IBinaryWriter;
-
-    [WriteRepeated(nameof(RepeatedItemType.VarIntZigZag), true)]
-    public static partial void WriteRepeatedVarIntZigZag<T, TWriter>(scoped ref TWriter writer, int number, ReadOnlySpan<T> value, RepeatedEncoding repeatedEncoding = RepeatedEncoding.Auto)
-        where T : IBinaryInteger<T>, ISignedNumber<T>
-        where TWriter : struct, IBinaryWriter, allows ref struct;
-    [WriteRepeated(nameof(RepeatedItemType.VarIntZigZag), true)]
-    public static partial void WriteRepeatedVarIntZigZag<T, TWriter>(scoped ref TWriter writer, int number, IEnumerable<T> value, RepeatedEncoding repeatedEncoding = RepeatedEncoding.Auto)
-        where T : IBinaryInteger<T>, ISignedNumber<T>
-        where TWriter : struct, IBinaryWriter, allows ref struct;
-    [WriteRepeated(nameof(RepeatedItemType.VarIntZigZag), false)]
-    public static partial void WriteRepeatedVarIntZigZag<T, TWriter>(TWriter writer, int number, ReadOnlySpan<T> value, RepeatedEncoding repeatedEncoding = RepeatedEncoding.Auto)
-        where T : IBinaryInteger<T>, ISignedNumber<T>
-        where TWriter : class, IBinaryWriter;
-    [WriteRepeated(nameof(RepeatedItemType.VarIntZigZag), false)]
-    public static partial void WriteRepeatedVarIntZigZag<T, TWriter>(TWriter writer, int number, IEnumerable<T> value, RepeatedEncoding repeatedEncoding = RepeatedEncoding.Auto)
-        where T : IBinaryInteger<T>, ISignedNumber<T>
-        where TWriter : class, IBinaryWriter;
-
-    [WriteRepeated(nameof(RepeatedItemType.Fixed32), true)]
-    public static partial void WriteRepeatedFixed32<T, TWriter>(scoped ref TWriter writer, int number, ReadOnlySpan<T> value, RepeatedEncoding repeatedEncoding = RepeatedEncoding.Auto)
-        where T : struct
-        where TWriter : struct, IBinaryWriter, allows ref struct;
-    [WriteRepeated(nameof(RepeatedItemType.Fixed32), true)]
-    public static partial void WriteRepeatedFixed32<T, TWriter>(scoped ref TWriter writer, int number, IEnumerable<T> value, RepeatedEncoding repeatedEncoding = RepeatedEncoding.Auto)
-        where T : struct
-        where TWriter : struct, IBinaryWriter, allows ref struct;
-    [WriteRepeated(nameof(RepeatedItemType.Fixed32), false)]
-    public static partial void WriteRepeatedFixed32<T, TWriter>(TWriter writer, int number, ReadOnlySpan<T> value, RepeatedEncoding repeatedEncoding = RepeatedEncoding.Auto)
-        where T : struct
-        where TWriter : class, IBinaryWriter;
-    [WriteRepeated(nameof(RepeatedItemType.Fixed32), false)]
-    public static partial void WriteRepeatedFixed32<T, TWriter>(TWriter writer, int number, IEnumerable<T> value, RepeatedEncoding repeatedEncoding = RepeatedEncoding.Auto)
-        where T : struct
-        where TWriter : class, IBinaryWriter;
-
-    [WriteRepeated(nameof(RepeatedItemType.Fixed64), true)]
-    public static partial void WriteRepeatedFixed64<T, TWriter>(scoped ref TWriter writer, int number, ReadOnlySpan<T> value, RepeatedEncoding repeatedEncoding = RepeatedEncoding.Auto)
-        where T : struct
-        where TWriter : struct, IBinaryWriter, allows ref struct;
-    [WriteRepeated(nameof(RepeatedItemType.Fixed64), true)]
-    public static partial void WriteRepeatedFixed64<T, TWriter>(scoped ref TWriter writer, int number, IEnumerable<T> value, RepeatedEncoding repeatedEncoding = RepeatedEncoding.Auto)
-        where T : struct
-        where TWriter : struct, IBinaryWriter, allows ref struct;
-    [WriteRepeated(nameof(RepeatedItemType.Fixed64), false)]
-    public static partial void WriteRepeatedFixed64<T, TWriter>(TWriter writer, int number, ReadOnlySpan<T> value, RepeatedEncoding repeatedEncoding = RepeatedEncoding.Auto)
-        where T : struct
-        where TWriter : class, IBinaryWriter;
-    [WriteRepeated(nameof(RepeatedItemType.Fixed64), false)]
-    public static partial void WriteRepeatedFixed64<T, TWriter>(TWriter writer, int number, IEnumerable<T> value, RepeatedEncoding repeatedEncoding = RepeatedEncoding.Auto)
-        where T : struct
-        where TWriter : class, IBinaryWriter;
-
-    [WriteRepeated(nameof(RepeatedItemType.Bool), true)]
-    public static partial void WriteRepeatedBool<TWriter>(scoped ref TWriter writer, int number, ReadOnlySpan<bool> value, RepeatedEncoding repeatedEncoding = RepeatedEncoding.Auto)
-        where TWriter : struct, IBinaryWriter, allows ref struct;
-    [WriteRepeated(nameof(RepeatedItemType.Bool), true)]
-    public static partial void WriteRepeatedBool<TWriter>(scoped ref TWriter writer, int number, IEnumerable<bool> value, RepeatedEncoding repeatedEncoding = RepeatedEncoding.Auto)
-        where TWriter : struct, IBinaryWriter, allows ref struct;
-    [WriteRepeated(nameof(RepeatedItemType.Bool), false)]
-    public static partial void WriteRepeatedBool<TWriter>(TWriter writer, int number, ReadOnlySpan<bool> value, RepeatedEncoding repeatedEncoding = RepeatedEncoding.Auto)
-        where TWriter : class, IBinaryWriter;
-    [WriteRepeated(nameof(RepeatedItemType.Bool), false)]
-    public static partial void WriteRepeatedBool<TWriter>(TWriter writer, int number, IEnumerable<bool> value, RepeatedEncoding repeatedEncoding = RepeatedEncoding.Auto)
-        where TWriter : class, IBinaryWriter;
-
-    [ReadRepeated(nameof(RepeatedItemType.VarInt), true)]
-    public static partial bool ReadRepeatedVarInt<T, TReader>(scoped ref TReader reader, WireType wireType, ICollection<T> destination, out ParseStatus status)
-        where T : IBinaryInteger<T>
-        where TReader : struct, IStructBinaryReader<TReader>, allows ref struct;
-    [ReadRepeated(nameof(RepeatedItemType.VarInt), false)]
-    public static partial bool ReadRepeatedVarInt<T, TReader>(TReader reader, WireType wireType, ICollection<T> destination, out ParseStatus status)
-        where T : IBinaryInteger<T>
-        where TReader : class, IClassBinaryReader<TReader>;
-
-    [ReadRepeated(nameof(RepeatedItemType.VarIntZigZag), true)]
-    public static partial bool ReadRepeatedVarIntZigZag<T, TReader>(scoped ref TReader reader, WireType wireType, ICollection<T> destination, out ParseStatus status)
-        where T : IBinaryInteger<T>, ISignedNumber<T>
-        where TReader : struct, IStructBinaryReader<TReader>, allows ref struct;
-    [ReadRepeated(nameof(RepeatedItemType.VarIntZigZag), false)]
-    public static partial bool ReadRepeatedVarIntZigZag<T, TReader>(TReader reader, WireType wireType, ICollection<T> destination, out ParseStatus status)
-        where T : IBinaryInteger<T>, ISignedNumber<T>
-        where TReader : class, IClassBinaryReader<TReader>;
-
-    [ReadRepeated(nameof(RepeatedItemType.Fixed32), true)]
-    public static partial bool ReadRepeatedFixed32<T, TReader>(scoped ref TReader reader, WireType wireType, ICollection<T> destination, out ParseStatus status)
-        where T : struct
-        where TReader : struct, IStructBinaryReader<TReader>, allows ref struct;
-    [ReadRepeated(nameof(RepeatedItemType.Fixed32), false)]
-    public static partial bool ReadRepeatedFixed32<T, TReader>(TReader reader, WireType wireType, ICollection<T> destination, out ParseStatus status)
-        where T : struct
-        where TReader : class, IClassBinaryReader<TReader>;
-
-    [ReadRepeated(nameof(RepeatedItemType.Fixed64), true)]
-    public static partial bool ReadRepeatedFixed64<T, TReader>(scoped ref TReader reader, WireType wireType, ICollection<T> destination, out ParseStatus status)
-        where T : struct
-        where TReader : struct, IStructBinaryReader<TReader>, allows ref struct;
-    [ReadRepeated(nameof(RepeatedItemType.Fixed64), false)]
-    public static partial bool ReadRepeatedFixed64<T, TReader>(TReader reader, WireType wireType, ICollection<T> destination, out ParseStatus status)
-        where T : struct
-        where TReader : class, IClassBinaryReader<TReader>;
-
-    public static bool TryReadRepeatedBool<TReader>(scoped ref TReader reader, WireType wireType, ICollection<bool> destination, out ParseStatus status)
+    public static void ReadClassField<THandler, TReader, T>(ref TReader subReader, FieldInfo fi, SerializationOptions? options, ref T? value, ref bool existed)
+        where THandler : IClassProtobufTypeHandler<T>
         where TReader : struct, IStructBinaryReader<TReader>, allows ref struct
+        where T : class
     {
-        switch (wireType)
+        if (!existed)
         {
-            case WireType.VarInt:
-                if (!reader.TryReadBool(out bool value, out status))
-                    return false;
-                destination.Add(value);
-                return true;
-            case WireType.LengthDelimited:
-                if (!TReader.TryCreateLengthDelimitedReader(ref reader, out TReader subReader, out status))
-                {
-                    subReader.Dispose();
-                    return false;
-                }
-                using (subReader)
-                {
-                    ParseStatus subStatus;
-                    while (subReader.TryReadBool(out value, out subStatus))
-                        destination.Add(value);
-                    if (subStatus is ParseStatus.ExactEndOfStream)
-                        return true;
-                }
-                goto default;
-            default:
-                status = ParseStatus.InvalidData;
-                return false;
+            value = THandler.CreateInstance(fi, options);
+            existed = true;
         }
-    }
-    public static bool TryReadRepeatedBool<TReader>(TReader reader, WireType wireType, ICollection<bool> destination, out ParseStatus status)
-        where TReader : class, IClassBinaryReader<TReader>
-    {
-        switch (wireType)
-        {
-            case WireType.VarInt:
-                if (!reader.TryReadBool(out bool value, out status))
-                    return false;
-                destination.Add(value);
-                return true;
-            case WireType.LengthDelimited:
-                if (!TReader.TryCreateLengthDelimitedReader(reader, out TReader? subReader, out status))
-                {
-                    subReader?.Dispose();
-                    return false;
-                }
-                using (subReader)
-                {
-                    ParseStatus subStatus;
-                    while (subReader.TryReadBool(out value, out subStatus))
-                        destination.Add(value);
-                    if (subStatus is ParseStatus.ExactEndOfStream)
-                        return true;
-                }
-                goto default;
-            default:
-                status = ParseStatus.InvalidData;
-                return false;
-        }
+        THandler.ReadProtobuf(value!, ref subReader, fi, options);
     }
 }

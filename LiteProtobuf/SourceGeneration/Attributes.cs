@@ -3,19 +3,20 @@
 namespace Myitian.LiteProtobuf.SourceGeneration;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false, AllowMultiple = false)]
-public sealed class DefaultTryCreateInstanceAttribute : Attribute;
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false, AllowMultiple = false)]
-public sealed class DefaultCreateInstanceAttribute : Attribute;
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false, AllowMultiple = false)]
-public sealed class DefaultTryCreateFulfilledAttribute : Attribute;
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false, AllowMultiple = false)]
-public sealed class DefaultCreateFulfilledAttribute : Attribute;
+public sealed class GeneratedDefaultImplementationAttribute : Attribute
+{
+    public bool TryCreateInstance { get; set; }
+    public bool CreateInstance { get; set; }
+    public bool TryCreateFulfilled { get; set; }
+    public bool CreateFulfilled { get; set; }
+}
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false, AllowMultiple = false)]
 public sealed class GeneratedProtobufTypeSerializerAttribute : Attribute
 {
     public bool Read { get; set; } = true;
     public bool TryRead { get; set; } = true;
     public bool Write { get; set; } = true;
+    public bool NoSort { get; set; } = false;
 }
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
 public sealed class ProtobufFieldAttribute(int number, FieldType fieldType = FieldType.Auto) : Attribute
@@ -29,3 +30,5 @@ public sealed class ProtobufFieldAttribute(int number, FieldType fieldType = Fie
     public Type? ReadHandler { get => field ?? Handler; set; } = null;
     public Type? WriteHandler { get => field ?? Handler; set; } = null;
 }
+[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
+public sealed class RemainingProtobufFieldsAttribute : Attribute;

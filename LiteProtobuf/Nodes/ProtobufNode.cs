@@ -4,9 +4,10 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Myitian.LiteProtobuf.Nodes;
 
-[DefaultCreateInstance]
-[DefaultTryCreateFulfilled]
-[DefaultCreateFulfilled]
+[GeneratedDefaultImplementation(
+    CreateInstance = true,
+    TryCreateFulfilled = true,
+    CreateFulfilled = true)]
 public abstract partial class ProtobufNode(WireType type)
     : IProtobufType<ProtobufNode>
 {

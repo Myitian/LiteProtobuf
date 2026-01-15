@@ -4,10 +4,11 @@ using System.Text;
 
 namespace Myitian.LiteProtobuf.Nodes;
 
-[DefaultTryCreateInstance]
-[DefaultCreateInstance]
-[DefaultTryCreateFulfilled]
-[DefaultCreateFulfilled]
+[GeneratedDefaultImplementation(
+    TryCreateInstance = true,
+    CreateInstance = true,
+    TryCreateFulfilled = true,
+    CreateFulfilled = true)]
 public partial class ProtobufByteArray()
     : ProtobufNode(WireType.LengthDelimited), IProtobufType<ProtobufByteArray>
 {

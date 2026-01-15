@@ -11,7 +11,7 @@ public struct FieldInfo
     /// </summary>
     public FieldType FieldTypeHint;
     /// <summary>
-    /// Only used in ReadProtobuf/TryReadProtobuf.
+    /// Only used during deserialization.
     /// </summary>
     public WireType ReceivedWireType;
     /// <summary>
