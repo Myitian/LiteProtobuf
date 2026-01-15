@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Myitian.LiteProtobuf.CompileTimeSourceGeneration;
+namespace Myitian.LiteProtobuf.SourceGeneration;
 
 public enum RepeatedInfo : byte
 {

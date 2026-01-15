@@ -124,7 +124,7 @@ partial class Example : IProtobufType<Example>
 
                 }
                 //if (!TryCreateInstance(fi, options, out ProtobufNode? child))
-                    //throw new InvalidDataException($"Invalid wire type: {fi}");
+                //throw new InvalidDataException($"Invalid wire type: {fi}");
                 //child.ReadProtobuf(ref subReader, fi, options);
                 //Children.Add(new(fi.Number, child));
             }
