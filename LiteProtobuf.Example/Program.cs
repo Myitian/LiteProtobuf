@@ -6,7 +6,7 @@ namespace Myitian.LiteProtobuf.Example;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         string p = Console.ReadLine().AsSpan().Trim().Trim('"').ToString();
         ReadOnlySpan<byte> buffer = File.ReadAllBytes(p);
@@ -49,13 +49,15 @@ class Program
 }
 
 
+// *** The following code is testing serialization prototypes and has no practical function! ***
+
 
 [GeneratedDefaultImplementation(
     TryCreateInstance = true,
     CreateInstance = true,
     TryCreateFulfilled = true,
     CreateFulfilled = true)]
-[GeneratedProtobufTypeSerializer(Read = true)]
+[GeneratedProtobufTypeSerializer(Read = true, NoSort = false)]
 partial class ExampleMessage : IProtobufType<ExampleMessage>
 {
     [ProtobufField(1, FieldType.Fixed32)]
@@ -80,13 +82,6 @@ partial class ExampleMessage : IProtobufType<ExampleMessage>
         TReader subReader = TReader.CreateLengthDelimitedReader(ref reader);
         try
         {
-            int __1_value = default;
-            int __2_value = default;
-            List<bool>? __3_value = default;
-            ProtobufString? __4_value = default;
-            bool __1_existed = false;
-            bool __2_existed = false;
-            bool __3_existed = false;
             ParseStatus subStatus;
             while (subReader.TryReadTag(out FieldInfo fi, out subStatus))
             {
@@ -95,38 +90,21 @@ partial class ExampleMessage : IProtobufType<ExampleMessage>
                     case 1:
                         fi.FieldTypeHint = (FieldType)0;
                         fi.CustomAttribute = 0;
-                        {
-                            __1_value = subReader.ReadFixed32<int>();
-                            __1_existed = true;
-                        }
                         break;
                     case 2:
                         fi.FieldTypeHint = (FieldType)0;
                         fi.CustomAttribute = 0;
-                        {
-                            __2_value = subReader.ReadFixed64<int>();
-                            __2_existed = true;
-                        }
                         break;
                     case 3:
                         fi.FieldTypeHint = (FieldType)0;
                         fi.CustomAttribute = 0;
-                        //ReadField(ref subReader, fi, options, ref __3_value, ref __3_existed);
                         break;
                     case 4:
                         fi.FieldTypeHint = (FieldType)0;
                         fi.CustomAttribute = 0;
-                        {
-                            __2_value = subReader.ReadFixed64<int>();
-                            __2_existed = true;
-                        }
                         break;
 
                 }
-                //if (!TryCreateInstance(fi, options, out ProtobufNode? child))
-                //throw new InvalidDataException($"Invalid wire type: {fi}");
-                //child.ReadProtobuf(ref subReader, fi, options);
-                //Children.Add(new(fi.Number, child));
             }
             if (subStatus != ParseStatus.ExactEndOfStream)
                 throw new InvalidDataException();

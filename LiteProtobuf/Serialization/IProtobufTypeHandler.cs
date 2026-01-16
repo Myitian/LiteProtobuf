@@ -2,11 +2,15 @@
 
 namespace Myitian.LiteProtobuf.Serialization;
 
-public interface IProtobufTypeFactory<T>
+public interface IProtobufTypeFieldInfoValidator<T>
     where T : allows ref struct
 {
     public static abstract bool IsFieldInfoValid(FieldInfo fieldInfo, SerializationOptions? options);
     public static abstract bool IsFieldInfoValidForInstance(in T value, FieldInfo fieldInfo, SerializationOptions? options);
+}
+public interface IProtobufTypeFactory<T> : IProtobufTypeFieldInfoValidator<T>
+    where T : allows ref struct
+{
     public static abstract bool TryCreateInstance(FieldInfo fieldInfo, SerializationOptions? options, [NotNullWhen(true)] out T? value);
     public static abstract T CreateInstance(FieldInfo fieldInfo, SerializationOptions? options);
     public static abstract bool TryCreateFulfilled<TReader>(scoped ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options, [NotNullWhen(true)] out T? value, out ParseStatus status)
@@ -18,7 +22,7 @@ public interface IProtobufTypeFactory<T>
     public static abstract T CreateFulfilled<TReader>(TReader reader, FieldInfo fieldInfo, SerializationOptions? options)
         where TReader : class, IClassBinaryReader<TReader>;
 }
-public interface IReadOnlyStructProtobufTypeHandler<T>
+public interface IReadOnlyStructProtobufTypeHandler<T> : IProtobufTypeFieldInfoValidator<T>
     where T : struct, allows ref struct
 {
     public static abstract bool TryReadProtobuf<TReader>(scoped ref T self, scoped ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
@@ -41,7 +45,7 @@ public interface IWriteOnlyStructProtobufTypeHandler<T>
 public interface IStructProtobufTypeHandler<T>
     : IProtobufTypeFactory<T>, IReadOnlyStructProtobufTypeHandler<T>, IWriteOnlyStructProtobufTypeHandler<T>
     where T : struct, allows ref struct;
-public interface IReadOnlyClassProtobufTypeHandler<T>
+public interface IReadOnlyClassProtobufTypeHandler<T> : IProtobufTypeFieldInfoValidator<T>
     where T : class
 {
     public static abstract bool TryReadProtobuf<TReader>(T self, scoped ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)

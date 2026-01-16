@@ -92,6 +92,14 @@ static partial class DefaultHandler
             public sealed class {1}CollectionReadOnlyHandler{4} : IReadOnlyClassProtobufTypeHandler<ICollection<{2}>>
             """;
         public string Body => """
+            public static bool IsFieldInfoValid(FieldInfo fieldInfo, SerializationOptions? options)
+            {{
+                return fieldInfo.ReceivedWireType is WireType.{0} or WireType.LengthDelimited;
+            }}
+            public static bool IsFieldInfoValidForInstance(in ICollection<{2}> value, FieldInfo fieldInfo, SerializationOptions? options)
+            {{
+                return IsFieldInfoValid(fieldInfo, options);
+            }}
             public static bool TryReadProtobuf<TReader>(ICollection<{2}> self, scoped ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
                 where TReader : struct, IStructBinaryReader<TReader>, allows ref struct
             {{

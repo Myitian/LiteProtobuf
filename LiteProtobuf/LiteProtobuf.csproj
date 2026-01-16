@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -16,7 +15,6 @@
     <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
     -->
   </PropertyGroup>
-  <!---->
   <ItemGroup>
     <ProjectReference Include="..\LiteProtobuf.CompileTimeSourceGeneration\LiteProtobuf.CompileTimeSourceGeneration.csproj" PrivateAssets="all" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\LiteProtobuf.SourceGeneration\LiteProtobuf.SourceGeneration.csproj" PackAsAnalyzer="true" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />

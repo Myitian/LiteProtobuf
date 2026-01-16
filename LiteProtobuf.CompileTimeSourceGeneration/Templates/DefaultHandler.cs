@@ -48,7 +48,7 @@ static partial class DefaultHandler
             GenerateCore(writer, in model, formatArgs.Array, EnumerableWriteOnlyHandler.Instance);
             GenerateCore(writer, in model, formatArgs.Array, ReadOnlySpanWriteOnlyHandler.Instance);
             string code = sb.ToString();
-            context.AddSource($"DefaultHandler/{model.Mode}.g.cs", code);
+            context.AddSource($"DefaultHandler/{model.Mode}Handler.g.cs", code);
         }
     }
 
