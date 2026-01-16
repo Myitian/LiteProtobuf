@@ -1,5 +1,5 @@
 # LiteProtobuf
-A simple Protobuf serializer/deserializer. A non-simple Protobuf serializer/deserializer that heavily utilizes source generation.
+A Protobuf serializer/deserializer that heavily utilizes source generation.
 
 Currently, only pre-defined ProtobufNode types are supported:
 - ProtobufByteArray
@@ -8,3 +8,5 @@ Currently, only pre-defined ProtobufNode types are supported:
 - ProtobufString
 
 The support for serializing custom types via source generators is in development.
+
+Support for `.proto` files will not be added in the near future. This feature may be added after the main serialization logic is completed.
