@@ -27,6 +27,7 @@ public sealed class ProtobufFieldAttribute(int number, FieldType fieldType = Fie
     public bool NoRead { get; set; } = false;
     public bool NoWrite { get; set; } = false;
     public Type? Handler { get; set; } = null;
+    public Type? Factory { get => field ?? Handler; set; } = null;
     public Type? ReadHandler { get => field ?? Handler; set; } = null;
     public Type? WriteHandler { get => field ?? Handler; set; } = null;
 }

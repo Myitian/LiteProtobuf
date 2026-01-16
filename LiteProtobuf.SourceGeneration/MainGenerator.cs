@@ -28,12 +28,20 @@ internal class MainGenerator : IIncrementalGenerator
     public const string FQG_IClassBinaryReader = $"{Global}{NS_Myitian_LiteProtobuf}.IClassBinaryReader";
     public const string FQG_ParseStatus = $"{Global}{NS_Myitian_LiteProtobuf}.ParseStatus";
     public const string FQG_WireType = $"{Global}{NS_Myitian_LiteProtobuf}.WireType";
-    public const string FQG_Defaults = $"{Global}{NS_Myitian_LiteProtobuf}.Defaults";
     public const string FQG_FieldInfo = $"{Global}{NS_Myitian_LiteProtobuf_Serialization}.FieldInfo";
     public const string FQG_SerializationOptions = $"{Global}{NS_Myitian_LiteProtobuf_Serialization}.SerializationOptions";
+    public const string FQG_DefaultImplementation = $"{Global}{NS_Myitian_LiteProtobuf_Serialization}.DefaultImplementation";
+
+    public static readonly SymbolDisplayFormat DeclarationFormat = new(
+        SymbolDisplayGlobalNamespaceStyle.Omitted,
+        SymbolDisplayTypeQualificationStyle.NameOnly,
+        SymbolDisplayGenericsOptions.IncludeTypeParameters,
+        miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
+    public static readonly SymbolDisplayFormat NullableFullyQualifiedFormat = SymbolDisplayFormat.FullyQualifiedFormat
+        .AddMiscellaneousOptions(SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier);
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        // new System.Threading.Thread(() => System.Threading.Thread.Sleep(100000)) { IsBackground = false }.Start(); // Keep console not to close
+        // new System.Threading.Thread(static () => System.Threading.Thread.Sleep(100000)) { IsBackground = false }.Start(); // Keep console not to close to check the console output
         GeneratedDefaultImplementation.RegisterSourceOutput(context);
         GeneratedProtobufTypeSerializer.RegisterSourceOutput(context);
     }

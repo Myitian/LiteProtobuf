@@ -1,81 +1,81 @@
 using Microsoft.CodeAnalysis;
 using System.CodeDom.Compiler;
+using System.Collections.Frozen;
 using System.IO;
 
 namespace Myitian.LiteProtobuf.CompileTimeSourceGeneration.Templates;
 
-public partial class Repeated
+partial class Repeated
 {
-    public partial class Write
+    static partial class Write
     {
-        private static readonly IType[] types = [
-            VarInt.Instance,
-            Fixed.Instance,
-            Bool.Instance
-        ];
-
-        public static void Apply(IncrementalGeneratorPostInitializationContext context)
+        const string Signature = """
+            public static void WriteRepeated{1}<{3}TWriter>({6}TWriter writer, int number, {5}<{2}> value, RepeatedEncoding repeatedEncoding = RepeatedEncoding.Auto)
+            """;
+        static readonly FrozenDictionary<string, IHandler> HandlerMap = FrozenDictionary.ToFrozenDictionary<string, IHandler>([
+            new("VarInt",       VarInt.Instance),
+            new("VarIntZigZag", VarInt.Instance),
+            new("Fixed32",      Fixed.Instance ),
+            new("Fixed64",      Fixed.Instance ),
+            new("Bool",         Bool.Instance  )]);
+        public static void Generate(IncrementalGeneratorPostInitializationContext context)
         {
             IndentedTextWriter writer = new(new StringWriter());
-            writer.WriteLine(ProtobufUtilityHeader);
+            writer.WriteLine(SharedHeader);
             using (writer.CodeBlock())
             {
-                foreach (Model model in Models)
+                // <list type="bullet">
+                // <item><c>{0}</c>: base mode</item>
+                // <item><c>{1}</c>: mode</item>
+                // <item><c>{2}</c>: type param</item>
+                // <item><c>{3}</c>: type param with comma</item>
+                // <item><c>{4}</c>: private use (fixed size)</item>
+                // <item><c>{5}</c>: private use (container type)</item>
+                // <item><c>{6}</c>: private use (<see langword="scoped ref"/>)</item>
+                // </list>
+                using PooledArrayHandle<object> formatArgs = new(6);
+                foreach (InternalGenerator.Model model in InternalGenerator.Models)
                 {
-                    ApplyCore(writer, model, true, true);
-                    ApplyCore(writer, model, false, true);
-                    ApplyCore(writer, model, true, false);
-                    ApplyCore(writer, model, false, false);
+                    IHandler handler = HandlerMap[model.Mode];
+                    formatArgs.Array[0] = model.BaseMode;
+                    formatArgs.Array[1] = model.Mode;
+                    formatArgs.Array[2] = model.TypeParam;
+                    formatArgs.Array[3] = model.Constraint is null ? "" : $"{model.TypeParam}, ";
+                    formatArgs.Array[4] = model.Mode[handler.Keyword.Length..];
+                    GenerateCore(writer, in model, handler, formatArgs.Array, true, true);
+                    GenerateCore(writer, in model, handler, formatArgs.Array, false, true);
+                    GenerateCore(writer, in model, handler, formatArgs.Array, true, false);
+                    GenerateCore(writer, in model, handler, formatArgs.Array, false, false);
                 }
             }
             string code = writer.InnerWriter.ToString();
             context.AddSource("ProtobufUtility.WriteRepeated.g.cs", code);
         }
-        public static void ApplyCore(IndentedTextWriter writer, Model model, bool isValueType, bool isReadOnlySpan)
+        static void GenerateCore(
+            IndentedTextWriter writer,
+            in InternalGenerator.Model model,
+            IHandler handler,
+            object[] formatArgs,
+            bool isValueType,
+            bool isReadOnlySpan)
         {
-            // <list type="bullet">
-            // <item><c>{0}</c>: base mode</item>
-            // <item><c>{1}</c>: mode</item>
-            // <item><c>{2}</c>: type param</item>
-            // <item><c>{3}</c>: type param with comma</item>
-            // <item><c>{4}</c>: scoped ref</item>
-            // <item><c>{5}</c>: private use (container)</item>
-            // <item><c>{6}</c>: private use (fixed size)</item>
-            // </list>
-            using PooledArrayHandle<object> formatArgs = new(7);
-            formatArgs.Array[0] = model.BaseMode;
-            formatArgs.Array[1] = model.Mode;
-            formatArgs.Array[2] = model.TypeParam;
-            formatArgs.Array[3] = model.Constraint is null ? "" : $"{model.TypeParam}, ";
-            formatArgs.Array[4] = isValueType ? "scoped ref " : "";
-            formatArgs.Array[5] = isReadOnlySpan ? "ReadOnlySpan" : "IEnumerable";
-            formatArgs.Array[6] = model.Mode[model.Type.Keyword.Length..];
-
-            writer.WriteLine(Sign, formatArgs.Array);
+            formatArgs[5] = isReadOnlySpan ? "ReadOnlySpan" : "IEnumerable";
+            formatArgs[6] = isValueType ? "scoped ref " : "";
+            writer.WriteLine(Signature, formatArgs);
             using (writer.IndentedBlock())
             {
                 if (!string.IsNullOrEmpty(model.Constraint))
-                    writer.WriteLine(model.Constraint, formatArgs.Array);
+                    writer.WriteLine(model.Constraint, formatArgs);
                 if (isValueType)
-                    writer.WriteLine("where TWriter : struct, IBinaryWriter, allows ref struct", formatArgs.Array);
+                    writer.WriteLine("where TWriter : struct, IBinaryWriter, allows ref struct", formatArgs);
                 else
-                    writer.WriteLine("where TWriter : class, IBinaryWriter", formatArgs.Array);
+                    writer.WriteLine("where TWriter : class, IBinaryWriter", formatArgs);
             }
             using (writer.CodeBlock())
             {
-                writer.WriteLines(isReadOnlySpan ? model.Type.ReadOnlySpan : model.Type.IEnumerable, formatArgs.Array);
-                writer.WriteLines(model.Type.Common, formatArgs.Array);
+                writer.WriteLines(isReadOnlySpan ? handler.ReadOnlySpan : handler.IEnumerable, formatArgs);
+                writer.WriteLines(handler.Body, formatArgs);
             }
-        }
-
-        public const string Sign = "public static void WriteRepeated{1}<{3}TWriter>({4}TWriter writer, int number, {5}<{2}> value, RepeatedEncoding repeatedEncoding = RepeatedEncoding.Auto)";
-
-        public interface IType
-        {
-            string Keyword { get; }
-            string ReadOnlySpan { get; }
-            string IEnumerable { get; }
-            string Common { get; }
         }
     }
 }

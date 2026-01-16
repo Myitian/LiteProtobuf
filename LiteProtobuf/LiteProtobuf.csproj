@@ -16,10 +16,9 @@
     <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
     -->
   </PropertyGroup>
-  
+  <!---->
   <ItemGroup>
     <ProjectReference Include="..\LiteProtobuf.CompileTimeSourceGeneration\LiteProtobuf.CompileTimeSourceGeneration.csproj" PrivateAssets="all" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\LiteProtobuf.SourceGeneration\LiteProtobuf.SourceGeneration.csproj" PackAsAnalyzer="true" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
-
 </Project>

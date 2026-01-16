@@ -17,7 +17,7 @@ static class GeneratedDefaultImplementation
             {{{MainGenerator.FQG_SerializationOptions}}}? options,
             [{{{MainGenerator.FQG_NotNullWhenAttribute}}}(true)] out {0} value)
         {{
-            return {{{MainGenerator.FQG_Defaults}}}.{2}ReadOnlyProtobufType<{1}>.TryCreateInstance(fieldInfo, options, out value);
+            return {{{MainGenerator.FQG_DefaultImplementation}}}.ProtobufType.TryCreateInstance<{1}>(fieldInfo, options, out value);
         }}
         """;
     public const string CreateInstance = $$$"""
@@ -25,7 +25,7 @@ static class GeneratedDefaultImplementation
             {{{MainGenerator.FQG_FieldInfo}}} fieldInfo,
             {{{MainGenerator.FQG_SerializationOptions}}}? options)
         {{
-            return {{{MainGenerator.FQG_Defaults}}}.ReadOnlyProtobufType<{1}>.CreateInstance(fieldInfo, options);
+            return {{{MainGenerator.FQG_DefaultImplementation}}}.ProtobufType.CreateInstance<{1}>(fieldInfo, options);
         }}
         """;
     public const string TryCreateFulfilled = $$$"""
@@ -37,7 +37,7 @@ static class GeneratedDefaultImplementation
              out {{{MainGenerator.FQG_ParseStatus}}} status)
              where TReader : struct, {{{MainGenerator.FQG_IStructBinaryReader}}}<TReader>, allows ref struct
          {{
-             return {{{MainGenerator.FQG_Defaults}}}.ReadOnlyProtobufType<{1}>.TryCreateFulfilled(ref reader, fieldInfo, options, out value, out status);
+             return {{{MainGenerator.FQG_DefaultImplementation}}}.NoRefStructProtobufType.TryCreateFulfilled<{1}, TReader>(ref reader, fieldInfo, options, out value, out status);
          }}
          public static bool TryCreateFulfilled<TReader>(
              TReader reader,
@@ -47,7 +47,7 @@ static class GeneratedDefaultImplementation
              out {{{MainGenerator.FQG_ParseStatus}}} status)
              where TReader : class, {{{MainGenerator.FQG_IClassBinaryReader}}}<TReader>
          {{
-             return {{{MainGenerator.FQG_Defaults}}}.AllowsRefStructReadOnlyProtobufType<{1}>.TryCreateFulfilled(reader, fieldInfo, options, out value, out status);
+             return {{{MainGenerator.FQG_DefaultImplementation}}}.ProtobufType.TryCreateFulfilled<{1}, TReader>(reader, fieldInfo, options, out value, out status);
          }}
          """;
     public const string CreateFulfilled = $$$"""
@@ -57,7 +57,7 @@ static class GeneratedDefaultImplementation
              {{{MainGenerator.FQG_SerializationOptions}}}? options)
              where TReader : struct, {{{MainGenerator.FQG_IStructBinaryReader}}}<TReader>, allows ref struct
          {{
-             return {{{MainGenerator.FQG_Defaults}}}.AllowsRefStructReadOnlyProtobufType<{1}>.CreateFulfilled(ref reader, fieldInfo, options);
+             return {{{MainGenerator.FQG_DefaultImplementation}}}.ProtobufType.CreateFulfilled<{1}, TReader>(ref reader, fieldInfo, options);
          }}
          public static {1} CreateFulfilled<TReader>(
              TReader reader,
@@ -65,7 +65,7 @@ static class GeneratedDefaultImplementation
              {{{MainGenerator.FQG_SerializationOptions}}}? options)
              where TReader : class, {{{MainGenerator.FQG_IClassBinaryReader}}}<TReader>
          {{
-             return {{{MainGenerator.FQG_Defaults}}}.AllowsRefStructReadOnlyProtobufType<{1}>.CreateFulfilled(reader, fieldInfo, options);
+             return {{{MainGenerator.FQG_DefaultImplementation}}}.ProtobufType.CreateFulfilled<{1}, TReader>(reader, fieldInfo, options);
          }}
          """;
     public static void RegisterSourceOutput(IncrementalGeneratorInitializationContext context)
@@ -82,25 +82,25 @@ static class GeneratedDefaultImplementation
         bool isValueType = model.Target.IsValueType;
         ITypeSymbol symbol = isValueType ? model.Target : model.Target.WithNullableAnnotation(NullableAnnotation.Annotated);
 
-        using PooledArrayHandle<object> formatArgs = new(3);
-        formatArgs.Array[0] = symbol.ToDisplayString(Utils.NullableFullyQualifiedFormat);
+        using PooledArrayHandle<object> formatArgs = new(2);
+        formatArgs.Array[0] = symbol.ToDisplayString(MainGenerator.NullableFullyQualifiedFormat);
         formatArgs.Array[1] = symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-        formatArgs.Array[2] = isValueType ? "Struct" : "New";
-
         StringBuilder sb = new();
         IndentedTextWriter writer = new(new StringWriter(sb));
-        writer.BeginCSharpCode("#pragma warning disable CS0108", model.Target);
-        if ((model.EnabledMethods & EnabledMethod.TryCreateInstance) != EnabledMethod.None)
-            writer.WriteLines(TryCreateInstance, formatArgs.Array);
-        if ((model.EnabledMethods & EnabledMethod.CreateInstance) != EnabledMethod.None)
-            writer.WriteLines(CreateInstance, formatArgs.Array);
-        if ((model.EnabledMethods & EnabledMethod.TryCreateFulfilled) != EnabledMethod.None)
-            writer.WriteLines(TryCreateFulfilled, formatArgs.Array);
-        if ((model.EnabledMethods & EnabledMethod.CreateFulfilled) != EnabledMethod.None)
-            writer.WriteLines(CreateFulfilled, formatArgs.Array);
-        writer.EndCSharpCode();
+        writer.WriteCSharpHeader("#pragma warning disable CS0108");
+        using (writer.CSharpTypeBlock(model.Target))
+        {
+            if ((model.EnabledMethods & EnabledMethod.TryCreateInstance) != EnabledMethod.None)
+                writer.WriteLines(TryCreateInstance, formatArgs.Array);
+            if ((model.EnabledMethods & EnabledMethod.CreateInstance) != EnabledMethod.None)
+                writer.WriteLines(CreateInstance, formatArgs.Array);
+            if ((model.EnabledMethods & EnabledMethod.TryCreateFulfilled) != EnabledMethod.None)
+                writer.WriteLines(TryCreateFulfilled, formatArgs.Array);
+            if ((model.EnabledMethods & EnabledMethod.CreateFulfilled) != EnabledMethod.None)
+                writer.WriteLines(CreateFulfilled, formatArgs.Array);
+        }
         string code = writer.InnerWriter.ToString();
-        context.AddSource(sb.Clear().AppendClrName(model.Target).Append($"-{nameof(GeneratedDefaultImplementation)}.g.cs").ToString(), code);
+        context.AddSource(sb.Clear().Append($"{nameof(GeneratedDefaultImplementation)}/").AppendClrName(model.Target).Append(".g.cs").ToString(), code);
     }
     [Flags]
     enum EnabledMethod

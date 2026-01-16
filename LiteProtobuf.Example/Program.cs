@@ -56,7 +56,7 @@ class Program
     TryCreateFulfilled = true,
     CreateFulfilled = true)]
 [GeneratedProtobufTypeSerializer(Read = true)]
-partial class Example : IProtobufType<Example>
+partial class ExampleMessage : IProtobufType<ExampleMessage>
 {
     [ProtobufField(1, FieldType.Fixed32)]
     public int TestValField;
@@ -67,7 +67,7 @@ partial class Example : IProtobufType<Example>
     [ProtobufField(4, NoWrite = true)]
     public ProtobufString? TestValPropNW { get; set; }
 
-    [ProtobufField(3, Handler = typeof(ListHandlers.BooleanList))]
+    [ProtobufField(3, Handler = typeof(Serialization.DefaultHandler.BoolCollectionHandler<List<bool>>))]
     public List<bool>? ListBool { get; set; }
 
     private readonly ProtobufMessage remaingFields = new();
@@ -168,12 +168,12 @@ partial class Example : IProtobufType<Example>
         throw new NotImplementedException();
     }
 
-    bool IReadOnlyProtobufType<Example>.TryReadProtobuf<TReader>(TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
+    bool IReadOnlyProtobufType<ExampleMessage>.TryReadProtobuf<TReader>(TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
     {
         throw new NotImplementedException();
     }
 
-    void IWriteOnlyProtobufType<Example>.WriteProtobuf<TWriter>(TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)
+    void IWriteOnlyProtobufType<ExampleMessage>.WriteProtobuf<TWriter>(TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)
     {
         throw new NotImplementedException();
     }

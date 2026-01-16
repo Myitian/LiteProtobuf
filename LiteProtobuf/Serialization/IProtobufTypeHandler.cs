@@ -19,7 +19,6 @@ public interface IProtobufTypeFactory<T>
         where TReader : class, IClassBinaryReader<TReader>;
 }
 public interface IReadOnlyStructProtobufTypeHandler<T>
-    : IProtobufTypeFactory<T>
     where T : struct, allows ref struct
 {
     public static abstract bool TryReadProtobuf<TReader>(scoped ref T self, scoped ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
@@ -40,10 +39,9 @@ public interface IWriteOnlyStructProtobufTypeHandler<T>
         where TWriter : class, IClassBinaryWriter<TWriter>;
 }
 public interface IStructProtobufTypeHandler<T>
-    : IReadOnlyStructProtobufTypeHandler<T>, IWriteOnlyStructProtobufTypeHandler<T>
+    : IProtobufTypeFactory<T>, IReadOnlyStructProtobufTypeHandler<T>, IWriteOnlyStructProtobufTypeHandler<T>
     where T : struct, allows ref struct;
 public interface IReadOnlyClassProtobufTypeHandler<T>
-    : IProtobufTypeFactory<T>
     where T : class
 {
     public static abstract bool TryReadProtobuf<TReader>(T self, scoped ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
@@ -64,5 +62,5 @@ public interface IWriteOnlyClassProtobufTypeHandler<T>
             where TWriter : class, IClassBinaryWriter<TWriter>;
 }
 public interface IClassProtobufTypeHandler<T>
-    : IReadOnlyClassProtobufTypeHandler<T>, IWriteOnlyClassProtobufTypeHandler<T>
+    : IProtobufTypeFactory<T>, IReadOnlyClassProtobufTypeHandler<T>, IWriteOnlyClassProtobufTypeHandler<T>
     where T : class;
