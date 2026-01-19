@@ -47,7 +47,7 @@ public class InternalGenerator : IIncrementalGenerator
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         // new System.Threading.Thread(static () => System.Threading.Thread.Sleep(100000)) { IsBackground = false }.Start(); // Keep console not to close to check the console output
-        Repeated.RegisterAll(context);
+        RepeatedUtility.RegisterAll(context);
         DefaultHandler.RegisterAll(context);
     }
 }

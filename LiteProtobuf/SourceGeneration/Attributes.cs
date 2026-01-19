@@ -17,12 +17,13 @@ public sealed class GeneratedProtobufTypeSerializerAttribute : Attribute
     public bool TryRead { get; set; } = true;
     public bool Write { get; set; } = true;
     public bool NoSort { get; set; } = false;
+    public string? ReadingCompleteCallback { get; set; } = null;
 }
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
-public sealed class ProtobufFieldAttribute(int number, FieldType fieldType = FieldType.Auto) : Attribute
+public sealed class ProtobufFieldAttribute(int number, FieldTypeHint fieldType = FieldTypeHint.Auto) : Attribute
 {
     public int Number { get; } = number;
-    public FieldType FieldType { get; } = fieldType;
+    public FieldTypeHint FieldType { get; } = fieldType;
     public int CustomAttribute { get; set; } = 0;
     public bool NoRead { get; set; } = false;
     public bool NoWrite { get; set; } = false;
@@ -32,4 +33,10 @@ public sealed class ProtobufFieldAttribute(int number, FieldType fieldType = Fie
     public Type? WriteHandler { get => field ?? Handler; set; } = null;
 }
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
-public sealed class RemainingProtobufFieldsAttribute : Attribute;
+public sealed class ProtobufRemainingFieldsAttribute : Attribute
+{
+    public FieldTypeHint FieldType { get; set; } = FieldTypeHint.Auto;
+    public int CustomAttribute { get; set; } = 0;
+    public bool NoRead { get; set; } = false;
+    public bool NoWrite { get; set; } = false;
+}

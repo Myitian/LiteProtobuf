@@ -2,8 +2,8 @@
 
 namespace Myitian.LiteProtobuf.Serialization;
 
-public interface IReadOnlyProtobufType<T>
-    where T : IReadOnlyProtobufType<T>, allows ref struct
+public interface ICreatableProtobufType<T>
+    where T : ICreatableProtobufType<T>, allows ref struct
 {
     public static abstract bool IsFieldInfoValid(FieldInfo fieldInfo, SerializationOptions? options);
     public static abstract bool TryCreateInstance(FieldInfo fieldInfo, SerializationOptions? options, [NotNullWhen(true)] out T? value);
@@ -16,6 +16,9 @@ public interface IReadOnlyProtobufType<T>
         where TReader : struct, IStructBinaryReader<TReader>, allows ref struct;
     public static abstract T CreateFulfilled<TReader>(TReader reader, FieldInfo fieldInfo, SerializationOptions? options)
         where TReader : class, IClassBinaryReader<TReader>;
+}
+public interface IReadOnlyProtobufType
+{
     bool IsFieldInfoValidForInstance(FieldInfo fieldInfo, SerializationOptions? options);
     bool TryReadProtobuf<TReader>(scoped ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
         where TReader : struct, IStructBinaryReader<TReader>, allows ref struct;
@@ -26,8 +29,7 @@ public interface IReadOnlyProtobufType<T>
     void ReadProtobuf<TReader>(TReader reader, FieldInfo fieldInfo, SerializationOptions? options)
         where TReader : class, IClassBinaryReader<TReader>;
 }
-public interface IWriteOnlyProtobufType<T>
-    where T : IWriteOnlyProtobufType<T>, allows ref struct
+public interface IWriteOnlyProtobufType
 {
     void WriteProtobuf<TWriter>(scoped ref TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)
         where TWriter : struct, IStructBinaryWriter<TWriter>, allows ref struct;
@@ -35,5 +37,5 @@ public interface IWriteOnlyProtobufType<T>
         where TWriter : class, IClassBinaryWriter<TWriter>;
 }
 public interface IProtobufType<T>
-    : IReadOnlyProtobufType<T>, IWriteOnlyProtobufType<T>
-    where T : IProtobufType<T>, allows ref struct;
+    : ICreatableProtobufType<T>, IReadOnlyProtobufType, IWriteOnlyProtobufType
+    where T : ICreatableProtobufType<T>, IReadOnlyProtobufType, IWriteOnlyProtobufType, allows ref struct;

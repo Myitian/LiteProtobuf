@@ -54,14 +54,14 @@ public sealed partial class ProtobufMessage()
         }
         try
         {
-            return TryReadProtobufBody(ref subReader, options, out status);
+            return TryReadProtobufBody(ref subReader, fieldInfo, options, out status);
         }
         finally
         {
             subReader.Dispose();
         }
     }
-    public bool TryReadProtobufBody<TReader>(scoped ref TReader reader, SerializationOptions? options, out ParseStatus status)
+    public bool TryReadProtobufBody<TReader>(scoped ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
         where TReader : struct, IStructBinaryReader<TReader>, allows ref struct
     {
         Children.Clear();
@@ -104,14 +104,14 @@ public sealed partial class ProtobufMessage()
         }
         try
         {
-            return TryReadProtobufBody(subReader, options, out status);
+            return TryReadProtobufBody(subReader, fieldInfo, options, out status);
         }
         finally
         {
             subReader.Dispose();
         }
     }
-    public bool TryReadProtobufBody<TReader>(TReader reader, SerializationOptions? options, out ParseStatus status)
+    public bool TryReadProtobufBody<TReader>(TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
         where TReader : class, IClassBinaryReader<TReader>
     {
         Children.Clear();
@@ -140,21 +140,21 @@ public sealed partial class ProtobufMessage()
         Children.Add(new(fieldInfo.Number, child));
         return true;
     }
-    public override void ReadProtobuf<TReader>(scoped ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options)
+    public override void ReadProtobuf<TReader>(scoped ref TReader reader, FieldInfo fieldInfo = default, SerializationOptions? options = default)
     {
         if (!IsFieldInfoValidForInstance(fieldInfo, options))
             throw new InvalidDataException();
         TReader subReader = TReader.CreateLengthDelimitedReader(ref reader);
         try
         {
-            ReadProtobufBody(ref subReader, options);
+            ReadProtobufBody(ref subReader, fieldInfo, options);
         }
         finally
         {
             subReader.Dispose();
         }
     }
-    public void ReadProtobufBody<TReader>(scoped ref TReader subReader, SerializationOptions? options)
+    public void ReadProtobufBody<TReader>(scoped ref TReader subReader, FieldInfo fieldInfo = default, SerializationOptions? options = default)
         where TReader : struct, IStructBinaryReader<TReader>, allows ref struct
     {
         ParseStatus subStatus;
@@ -163,7 +163,7 @@ public sealed partial class ProtobufMessage()
         if (subStatus != ParseStatus.ExactEndOfStream)
             throw new InvalidDataException();
     }
-    public void AddProtobufField<TReader>(scoped ref TReader subReader, FieldInfo fieldInfo, SerializationOptions? options)
+    public void AddProtobufField<TReader>(scoped ref TReader subReader, FieldInfo fieldInfo = default, SerializationOptions? options = default)
         where TReader : struct, IStructBinaryReader<TReader>, allows ref struct
     {
         if (!TryCreateInstance(fieldInfo, options, out ProtobufNode? child))
@@ -171,14 +171,14 @@ public sealed partial class ProtobufMessage()
         child.ReadProtobuf(ref subReader, fieldInfo, options);
         Children.Add(new(fieldInfo.Number, child));
     }
-    public override void ReadProtobuf<TReader>(TReader reader, FieldInfo fieldInfo, SerializationOptions? options)
+    public override void ReadProtobuf<TReader>(TReader reader, FieldInfo fieldInfo = default, SerializationOptions? options = default)
     {
         if (!IsFieldInfoValidForInstance(fieldInfo, options))
             throw new InvalidDataException();
         using TReader subReader = TReader.CreateLengthDelimitedReader(reader);
-        ReadProtobufBody(subReader, options);
+        ReadProtobufBody(subReader, fieldInfo, options);
     }
-    public void ReadProtobufBody<TReader>(TReader subReader, SerializationOptions? options)
+    public void ReadProtobufBody<TReader>(TReader subReader, FieldInfo fieldInfo = default, SerializationOptions? options = default)
         where TReader : class, IClassBinaryReader<TReader>
     {
         ParseStatus subStatus;
@@ -187,7 +187,7 @@ public sealed partial class ProtobufMessage()
         if (subStatus != ParseStatus.ExactEndOfStream)
             throw new InvalidDataException();
     }
-    public void AddProtobufField<TReader>(TReader subReader, FieldInfo fieldInfo, SerializationOptions? options)
+    public void AddProtobufField<TReader>(TReader subReader, FieldInfo fieldInfo = default, SerializationOptions? options = default)
         where TReader : class, IClassBinaryReader<TReader>
     {
         if (!TryCreateInstance(fieldInfo, options, out ProtobufNode? child))
@@ -195,32 +195,32 @@ public sealed partial class ProtobufMessage()
         child.ReadProtobuf(subReader, fieldInfo, options);
         Children.Add(new(fieldInfo.Number, child));
     }
-    public override void WriteProtobuf<TWriter>(scoped ref TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)
+    public override void WriteProtobuf<TWriter>(scoped ref TWriter writer, FieldInfo fieldInfo = default, SerializationOptions? options = default)
     {
         writer.WriteTag(fieldInfo.Number, Type);
         TWriter subWriter = TWriter.CreateLengthDelimitedWriter(ref writer);
         try
         {
-            WriteProtobufBody(ref subWriter, options);
+            WriteProtobufBody(ref subWriter, fieldInfo, options);
         }
         finally
         {
             subWriter.Dispose();
         }
     }
-    public override void WriteProtobuf<TWriter>(TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)
+    public override void WriteProtobuf<TWriter>(TWriter writer, FieldInfo fieldInfo = default, SerializationOptions? options = default)
     {
         writer.WriteTag(fieldInfo.Number, Type);
         using TWriter subWriter = TWriter.CreateLengthDelimitedWriter(writer);
-        WriteProtobufBody(subWriter, options);
+        WriteProtobufBody(subWriter, fieldInfo, options);
     }
-    public void WriteProtobufBody<TWriter>(scoped ref TWriter writer, SerializationOptions? options)
+    public void WriteProtobufBody<TWriter>(scoped ref TWriter writer, FieldInfo fieldInfo = default, SerializationOptions? options = default)
         where TWriter : struct, IStructBinaryWriter<TWriter>, allows ref struct
     {
         foreach ((int i, ProtobufNode node) in Children)
             node.WriteProtobuf(ref writer, new() { Number = i }, options);
     }
-    public void WriteProtobufBody<TWriter>(TWriter writer, SerializationOptions? options)
+    public void WriteProtobufBody<TWriter>(TWriter writer, FieldInfo fieldInfo = default, SerializationOptions? options = default)
         where TWriter : class, IClassBinaryWriter<TWriter>
     {
         foreach ((int i, ProtobufNode node) in Children)

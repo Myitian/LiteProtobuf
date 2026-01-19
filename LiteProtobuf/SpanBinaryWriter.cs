@@ -9,7 +9,6 @@ public ref struct SpanBinaryWriter(Span<byte> bytes) : IStructBinaryWriter<SpanB
 {
     private readonly ref int _parentPosition = ref Unsafe.NullRef<int>();
     private int _position = 0;
-
     public readonly Span<byte> Span { get; } = bytes;
     public readonly int Position => _position;
     public SpanBinaryWriter(ref SpanBinaryWriter parent) : this(parent.Span[parent._position..])

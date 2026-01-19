@@ -4,43 +4,33 @@ using System.IO;
 
 namespace Myitian.LiteProtobuf.CompileTimeSourceGeneration.Templates;
 
-partial class Repeated
+partial class RepeatedUtility
 {
-    static class TryRead
+    static class Read
     {
         const string Signature = """
-            public static bool TryReadRepeated{1}<{3}TReader>({6}TReader reader, WireType wireType, ICollection<{2}> destination, out ParseStatus status)
+            public static void ReadRepeated{1}<TReader{3}>({6}TReader reader, WireType wireType, ICollection<{2}> destination)
             """;
         const string Body = """
             switch (wireType)
             {{
                 case WireType.{0}:
-                    if (!reader.TryRead{1}(out {2} value, out status))
-                        return false;
+                    {2} value = reader.Read{1}{4}();
                     destination.Add(value);
-                    return true;
+                    return;
                 case WireType.LengthDelimited:
-                    if (!TReader.TryCreateLengthDelimitedReader({5}reader, out TReader{4} subReader, out status))
-                    {{
-                        subReader{4}.Dispose();
-                        return false;
-                    }}
-                    try
+                    using (TReader subReader = TReader.CreateLengthDelimitedReader({5}reader))
                     {{
                         ParseStatus subStatus;
                         while (subReader.TryRead{1}(out value, out subStatus))
                             destination.Add(value);
                         if (subStatus is ParseStatus.ExactEndOfStream)
-                            return true;
+                            return;
+                        else
+                            throw IBinaryReader.GetExceptionByStatus(subStatus);
                     }}
-                    finally
-                    {{
-                        subReader.Dispose();
-                    }}
-                    goto default;
                 default:
-                    status = ParseStatus.InvalidData;
-                    return false;
+                    throw IBinaryReader.GetExceptionByStatus(ParseStatus.InvalidData);
             }}
             """;
         public static void Generate(IncrementalGeneratorPostInitializationContext context)
@@ -54,42 +44,42 @@ partial class Repeated
                 // <item><c>{1}</c>: mode</item>
                 // <item><c>{2}</c>: type param</item>
                 // <item><c>{3}</c>: type param with comma</item>
-                // <item><c>{4}</c>: private use (<c>?</c>)</item>
+                // <item><c>{4}</c>: private use (<c>&lt;T&gt;</c>)</item>
                 // <item><c>{5}</c>: private use (<see langword="ref"/>)</item>
                 // <item><c>{6}</c>: private use (<see langword="scoped ref"/>)</item>
                 // </list>
-                using PooledArrayHandle<object> formatArgs = new(7);
+                object[] formatArgs = new object[7];
                 foreach (InternalGenerator.Model model in InternalGenerator.Models)
                 {
-                    formatArgs.Array[0] = model.BaseMode;
-                    formatArgs.Array[1] = model.Mode;
-                    formatArgs.Array[2] = model.TypeParam;
-                    formatArgs.Array[3] = model.Constraint is null ? "" : $"{model.TypeParam}, ";
-                    GenerateCore(writer, in model, formatArgs.Array, true);
-                    GenerateCore(writer, in model, formatArgs.Array, false);
+                    formatArgs[0] = model.BaseMode;
+                    formatArgs[1] = model.Mode;
+                    formatArgs[2] = model.TypeParam;
+                    formatArgs[3] = model.Constraint is null ? "" : $", {model.TypeParam}";
+                    formatArgs[4] = model.Constraint is null ? "" : $"<{model.TypeParam}>";
+                    GenerateCore(writer, in model, formatArgs, true);
+                    GenerateCore(writer, in model, formatArgs, false);
                 }
             }
             string code = writer.InnerWriter.ToString();
-            context.AddSource("ProtobufUtility.TryReadRepeated.g.cs", code);
+            context.AddSource("RepeatedUtility.ReadRepeated.g.cs", code);
         }
-        public static void GenerateCore(
+        static void GenerateCore(
             IndentedTextWriter writer,
             in InternalGenerator.Model model,
             object[] formatArgs,
             bool isValueType)
         {
-            formatArgs[4] = isValueType ? "" : "?";
             formatArgs[5] = isValueType ? "ref " : "";
             formatArgs[6] = isValueType ? "scoped ref " : "";
             writer.WriteLine(Signature, formatArgs);
             using (writer.IndentedBlock())
             {
-                if (!string.IsNullOrEmpty(model.Constraint))
-                    writer.WriteLine(model.Constraint, formatArgs);
                 if (isValueType)
                     writer.WriteLine("where TReader : struct, IStructBinaryReader<TReader>, allows ref struct", formatArgs);
                 else
                     writer.WriteLine("where TReader : class, IClassBinaryReader<TReader>", formatArgs);
+                if (!string.IsNullOrEmpty(model.Constraint))
+                    writer.WriteLine(model.Constraint, formatArgs);
             }
             using (writer.CodeBlock())
             {

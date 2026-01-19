@@ -32,21 +32,21 @@ static partial class DefaultHandler
         // <item><c>{3}</c>: type param with comma</item>
         // <item><c>{4}</c>: private use (<c>&lt;T&gt;</c>)</item>
         // </list>
-        using PooledArrayHandle<object> formatArgs = new(5);
+        object[] formatArgs = new object[5];
         foreach (InternalGenerator.Model model in InternalGenerator.Models)
         {
             sb.Clear();
-            formatArgs.Array[0] = model.BaseMode;
-            formatArgs.Array[1] = model.Mode;
-            formatArgs.Array[2] = model.TypeParam;
-            formatArgs.Array[3] = model.Constraint is null ? "" : $"{model.TypeParam}, ";
-            formatArgs.Array[4] = model.Constraint is null ? "" : $"<{model.TypeParam}>";
+            formatArgs[0] = model.BaseMode;
+            formatArgs[1] = model.Mode;
+            formatArgs[2] = model.TypeParam;
+            formatArgs[3] = model.Constraint is null ? "" : $", {model.TypeParam}";
+            formatArgs[4] = model.Constraint is null ? "" : $"<{model.TypeParam}>";
             IndentedTextWriter writer = new(new StringWriter(sb));
             writer.WriteLine(SharedHeader);
-            GenerateCore(writer, in model, formatArgs.Array, CollectionHandler.Instance);
-            GenerateCore(writer, in model, formatArgs.Array, CollectionReadOnlyHandler.Instance);
-            GenerateCore(writer, in model, formatArgs.Array, EnumerableWriteOnlyHandler.Instance);
-            GenerateCore(writer, in model, formatArgs.Array, ReadOnlySpanWriteOnlyHandler.Instance);
+            GenerateCore(writer, in model, formatArgs, CollectionHandler.Instance);
+            GenerateCore(writer, in model, formatArgs, CollectionReadOnlyHandler.Instance);
+            GenerateCore(writer, in model, formatArgs, EnumerableWriteOnlyHandler.Instance);
+            GenerateCore(writer, in model, formatArgs, ReadOnlySpanWriteOnlyHandler.Instance);
             string code = sb.ToString();
             context.AddSource($"DefaultHandler/{model.Mode}Handler.g.cs", code);
         }

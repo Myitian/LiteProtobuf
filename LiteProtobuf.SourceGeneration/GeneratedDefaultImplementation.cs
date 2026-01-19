@@ -13,65 +13,65 @@ static class GeneratedDefaultImplementation
 {
     public const string TryCreateInstance = $$$"""
         public static bool TryCreateInstance(
-            {{{MainGenerator.FQG_FieldInfo}}} fieldInfo,
-            {{{MainGenerator.FQG_SerializationOptions}}}? options,
-            [{{{MainGenerator.FQG_NotNullWhenAttribute}}}(true)] out {0} value)
+            {{{SR.FQG_FieldInfo}}} fieldInfo,
+            {{{SR.FQG_SerializationOptions}}}? options,
+            [{{{SR.FQG_NotNullWhenAttribute}}}(true)] out {0} value)
         {{
-            return {{{MainGenerator.FQG_DefaultImplementation}}}.ProtobufType.TryCreateInstance<{1}>(fieldInfo, options, out value);
+            return {{{SR.FQG_DefaultImplementation}}}.ProtobufType.TryCreateInstance<{1}>(fieldInfo, options, out value);
         }}
         """;
     public const string CreateInstance = $$$"""
         public static {1} CreateInstance(
-            {{{MainGenerator.FQG_FieldInfo}}} fieldInfo,
-            {{{MainGenerator.FQG_SerializationOptions}}}? options)
+            {{{SR.FQG_FieldInfo}}} fieldInfo,
+            {{{SR.FQG_SerializationOptions}}}? options)
         {{
-            return {{{MainGenerator.FQG_DefaultImplementation}}}.ProtobufType.CreateInstance<{1}>(fieldInfo, options);
+            return {{{SR.FQG_DefaultImplementation}}}.ProtobufType.CreateInstance<{1}>(fieldInfo, options);
         }}
         """;
     public const string TryCreateFulfilled = $$$"""
          public static bool TryCreateFulfilled<TReader>(
              scoped ref TReader reader,
-             {{{MainGenerator.FQG_FieldInfo}}} fieldInfo,
-             {{{MainGenerator.FQG_SerializationOptions}}}? options,
-             [{{{MainGenerator.FQG_NotNullWhenAttribute}}}(true)] out {0} value,
-             out {{{MainGenerator.FQG_ParseStatus}}} status)
-             where TReader : struct, {{{MainGenerator.FQG_IStructBinaryReader}}}<TReader>, allows ref struct
+             {{{SR.FQG_FieldInfo}}} fieldInfo,
+             {{{SR.FQG_SerializationOptions}}}? options,
+             [{{{SR.FQG_NotNullWhenAttribute}}}(true)] out {0} value,
+             out {{{SR.FQG_ParseStatus}}} status)
+             where TReader : struct, {{{SR.FQG_IStructBinaryReader}}}<TReader>, allows ref struct
          {{
-             return {{{MainGenerator.FQG_DefaultImplementation}}}.NoRefStructProtobufType.TryCreateFulfilled<{1}, TReader>(ref reader, fieldInfo, options, out value, out status);
+             return {{{SR.FQG_DefaultImplementation}}}.NoRefStructProtobufType.TryCreateFulfilled<TReader, {1}>(ref reader, fieldInfo, options, out value, out status);
          }}
          public static bool TryCreateFulfilled<TReader>(
              TReader reader,
-             {{{MainGenerator.FQG_FieldInfo}}} fieldInfo,
-             {{{MainGenerator.FQG_SerializationOptions}}}? options,
-             [{{{MainGenerator.FQG_NotNullWhenAttribute}}}(true)] out {0} value,
-             out {{{MainGenerator.FQG_ParseStatus}}} status)
-             where TReader : class, {{{MainGenerator.FQG_IClassBinaryReader}}}<TReader>
+             {{{SR.FQG_FieldInfo}}} fieldInfo,
+             {{{SR.FQG_SerializationOptions}}}? options,
+             [{{{SR.FQG_NotNullWhenAttribute}}}(true)] out {0} value,
+             out {{{SR.FQG_ParseStatus}}} status)
+             where TReader : class, {{{SR.FQG_IClassBinaryReader}}}<TReader>
          {{
-             return {{{MainGenerator.FQG_DefaultImplementation}}}.ProtobufType.TryCreateFulfilled<{1}, TReader>(reader, fieldInfo, options, out value, out status);
+             return {{{SR.FQG_DefaultImplementation}}}.ProtobufType.TryCreateFulfilled<TReader, {1}>(reader, fieldInfo, options, out value, out status);
          }}
          """;
     public const string CreateFulfilled = $$$"""
          public static {1} CreateFulfilled<TReader>(
              scoped ref TReader reader,
-             {{{MainGenerator.FQG_FieldInfo}}} fieldInfo,
-             {{{MainGenerator.FQG_SerializationOptions}}}? options)
-             where TReader : struct, {{{MainGenerator.FQG_IStructBinaryReader}}}<TReader>, allows ref struct
+             {{{SR.FQG_FieldInfo}}} fieldInfo,
+             {{{SR.FQG_SerializationOptions}}}? options)
+             where TReader : struct, {{{SR.FQG_IStructBinaryReader}}}<TReader>, allows ref struct
          {{
-             return {{{MainGenerator.FQG_DefaultImplementation}}}.ProtobufType.CreateFulfilled<{1}, TReader>(ref reader, fieldInfo, options);
+             return {{{SR.FQG_DefaultImplementation}}}.ProtobufType.CreateFulfilled<TReader, {1}>(ref reader, fieldInfo, options);
          }}
          public static {1} CreateFulfilled<TReader>(
              TReader reader,
-             {{{MainGenerator.FQG_FieldInfo}}} fieldInfo,
-             {{{MainGenerator.FQG_SerializationOptions}}}? options)
-             where TReader : class, {{{MainGenerator.FQG_IClassBinaryReader}}}<TReader>
+             {{{SR.FQG_FieldInfo}}} fieldInfo,
+             {{{SR.FQG_SerializationOptions}}}? options)
+             where TReader : class, {{{SR.FQG_IClassBinaryReader}}}<TReader>
          {{
-             return {{{MainGenerator.FQG_DefaultImplementation}}}.ProtobufType.CreateFulfilled<{1}, TReader>(reader, fieldInfo, options);
+             return {{{SR.FQG_DefaultImplementation}}}.ProtobufType.CreateFulfilled<TReader, {1}>(reader, fieldInfo, options);
          }}
          """;
     public static void RegisterSourceOutput(IncrementalGeneratorInitializationContext context)
     {
         context.RegisterSourceOutput(context.SyntaxProvider.ForAttributeWithMetadataName(
-            fullyQualifiedMetadataName: MainGenerator.FQ_GeneratedDefaultImplementationAttribute,
+            fullyQualifiedMetadataName: SR.FQ_GeneratedDefaultImplementationAttribute,
             predicate: static (syntaxNode, _) => syntaxNode is BaseTypeDeclarationSyntax,
             transform: static (context, _) => new Model(context))
             .Where(static it => it.Target is not null),
@@ -80,27 +80,28 @@ static class GeneratedDefaultImplementation
     static void Apply(SourceProductionContext context, Model model)
     {
         bool isValueType = model.Target.IsValueType;
-        ITypeSymbol symbol = isValueType ? model.Target : model.Target.WithNullableAnnotation(NullableAnnotation.Annotated);
-
-        using PooledArrayHandle<object> formatArgs = new(2);
-        formatArgs.Array[0] = symbol.ToDisplayString(MainGenerator.NullableFullyQualifiedFormat);
-        formatArgs.Array[1] = symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        ITypeSymbol nullableTarget = isValueType ? model.Target
+            : model.Target.WithNullableAnnotation(NullableAnnotation.Annotated);
         StringBuilder sb = new();
         IndentedTextWriter writer = new(new StringWriter(sb));
         writer.WriteCSharpHeader("#pragma warning disable CS0108");
         using (writer.CSharpTypeBlock(model.Target))
         {
+            object[] formatArgs = [
+                nullableTarget.ToDisplayString(MainGenerator.NullableFullyQualifiedFormat),
+                nullableTarget.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)];
             if ((model.EnabledMethods & EnabledMethod.TryCreateInstance) != EnabledMethod.None)
-                writer.WriteLines(TryCreateInstance, formatArgs.Array);
+                writer.WriteLines(TryCreateInstance, formatArgs);
             if ((model.EnabledMethods & EnabledMethod.CreateInstance) != EnabledMethod.None)
-                writer.WriteLines(CreateInstance, formatArgs.Array);
+                writer.WriteLines(CreateInstance, formatArgs);
             if ((model.EnabledMethods & EnabledMethod.TryCreateFulfilled) != EnabledMethod.None)
-                writer.WriteLines(TryCreateFulfilled, formatArgs.Array);
+                writer.WriteLines(TryCreateFulfilled, formatArgs);
             if ((model.EnabledMethods & EnabledMethod.CreateFulfilled) != EnabledMethod.None)
-                writer.WriteLines(CreateFulfilled, formatArgs.Array);
+                writer.WriteLines(CreateFulfilled, formatArgs);
         }
-        string code = writer.InnerWriter.ToString();
-        context.AddSource(sb.Clear().Append($"{nameof(GeneratedDefaultImplementation)}/").AppendClrName(model.Target).Append(".g.cs").ToString(), code);
+        string code = sb.ToString();
+        string file = sb.Clear().AppendGeneratedFileName(nameof(GeneratedDefaultImplementation), model.Target).ToString();
+        context.AddSource(file, code);
     }
     [Flags]
     enum EnabledMethod
@@ -111,7 +112,7 @@ static class GeneratedDefaultImplementation
         TryCreateFulfilled = 0b0100,
         CreateFulfilled = 0b1000
     }
-    readonly struct Model
+    readonly record struct Model
     {
         public readonly INamedTypeSymbol Target = null!;
         public readonly EnabledMethod EnabledMethods = EnabledMethod.None;

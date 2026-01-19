@@ -5,12 +5,12 @@ using System.IO;
 
 namespace Myitian.LiteProtobuf.CompileTimeSourceGeneration.Templates;
 
-partial class Repeated
+partial class RepeatedUtility
 {
     static partial class Write
     {
         const string Signature = """
-            public static void WriteRepeated{1}<{3}TWriter>({6}TWriter writer, int number, {5}<{2}> value, RepeatedEncoding repeatedEncoding = RepeatedEncoding.Auto)
+            public static void WriteRepeated{1}<TWriter{3}>({6}TWriter writer, int number, {5}<{2}> value, bool? isPacked = null)
             """;
         static readonly FrozenDictionary<string, IHandler> HandlerMap = FrozenDictionary.ToFrozenDictionary<string, IHandler>([
             new("VarInt",       VarInt.Instance),
@@ -33,23 +33,23 @@ partial class Repeated
                 // <item><c>{5}</c>: private use (container type)</item>
                 // <item><c>{6}</c>: private use (<see langword="scoped ref"/>)</item>
                 // </list>
-                using PooledArrayHandle<object> formatArgs = new(6);
+                object[] formatArgs = new object[7];
                 foreach (InternalGenerator.Model model in InternalGenerator.Models)
                 {
                     IHandler handler = HandlerMap[model.Mode];
-                    formatArgs.Array[0] = model.BaseMode;
-                    formatArgs.Array[1] = model.Mode;
-                    formatArgs.Array[2] = model.TypeParam;
-                    formatArgs.Array[3] = model.Constraint is null ? "" : $"{model.TypeParam}, ";
-                    formatArgs.Array[4] = model.Mode[handler.Keyword.Length..];
-                    GenerateCore(writer, in model, handler, formatArgs.Array, true, true);
-                    GenerateCore(writer, in model, handler, formatArgs.Array, false, true);
-                    GenerateCore(writer, in model, handler, formatArgs.Array, true, false);
-                    GenerateCore(writer, in model, handler, formatArgs.Array, false, false);
+                    formatArgs[0] = model.BaseMode;
+                    formatArgs[1] = model.Mode;
+                    formatArgs[2] = model.TypeParam;
+                    formatArgs[3] = model.Constraint is null ? "" : $", {model.TypeParam}";
+                    formatArgs[4] = model.Mode[handler.Keyword.Length..];
+                    GenerateCore(writer, in model, handler, formatArgs, true, true);
+                    GenerateCore(writer, in model, handler, formatArgs, false, true);
+                    GenerateCore(writer, in model, handler, formatArgs, true, false);
+                    GenerateCore(writer, in model, handler, formatArgs, false, false);
                 }
             }
             string code = writer.InnerWriter.ToString();
-            context.AddSource("ProtobufUtility.WriteRepeated.g.cs", code);
+            context.AddSource("RepeatedUtility.WriteRepeated.g.cs", code);
         }
         static void GenerateCore(
             IndentedTextWriter writer,
@@ -64,12 +64,12 @@ partial class Repeated
             writer.WriteLine(Signature, formatArgs);
             using (writer.IndentedBlock())
             {
-                if (!string.IsNullOrEmpty(model.Constraint))
-                    writer.WriteLine(model.Constraint, formatArgs);
                 if (isValueType)
                     writer.WriteLine("where TWriter : struct, IBinaryWriter, allows ref struct", formatArgs);
                 else
                     writer.WriteLine("where TWriter : class, IBinaryWriter", formatArgs);
+                if (!string.IsNullOrEmpty(model.Constraint))
+                    writer.WriteLine(model.Constraint, formatArgs);
             }
             using (writer.CodeBlock())
             {

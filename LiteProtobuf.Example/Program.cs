@@ -1,5 +1,6 @@
 using Myitian.LiteProtobuf.Nodes;
 using Myitian.LiteProtobuf.Serialization;
+using Myitian.LiteProtobuf.Serialization.DefaultHandler;
 using Myitian.LiteProtobuf.SourceGeneration;
 
 namespace Myitian.LiteProtobuf.Example;
@@ -23,18 +24,18 @@ class Program
             {
                 // use TryCreateFulfilled or ReadProtobuf to read normal ProtobufMessage;
                 // use ReadProtobufBody to read a body-only ProtobufMessage.
-                root.ReadProtobufBody(ref reader, null);
+                root.ReadProtobufBody(ref reader);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
             }
             root = (ProtobufMessage)root.Expand();
-            root.WriteProtobufBody(writer, null);
+            root.WriteProtobufBody(writer);
 
             // If parsed correctly, the input and output should be consistent.
 
-            Console.WriteLine(root.ToFormattedString(null));
+            Console.WriteLine(root.ToFormattedString());
         }
         finally
         {
@@ -52,6 +53,8 @@ class Program
 // *** The following code is testing serialization prototypes and has no practical function! ***
 
 
+class MyBoolList : List<bool>;
+
 [GeneratedDefaultImplementation(
     TryCreateInstance = true,
     CreateInstance = true,
@@ -60,26 +63,43 @@ class Program
 [GeneratedProtobufTypeSerializer(Read = true, NoSort = false)]
 partial class ExampleMessage : IProtobufType<ExampleMessage>
 {
-    [ProtobufField(1, FieldType.Fixed32)]
+    [field: ProtobufField(10, FieldTypeHint.Fixed32)]
+    public bool Fx { get; set; } // ???
+
+    [ProtobufField(1, FieldTypeHint.Fixed32)]
     public int TestValField;
 
-    [ProtobufField(2, FieldType.Fixed64)]
-    public int TestValProp { get; set; }
+    [ProtobufField(2, FieldTypeHint.Fixed64)]
+    public int TestValProp { init { } }
 
     [ProtobufField(4, NoWrite = true)]
     public ProtobufString? TestValPropNW { get; set; }
 
-    [ProtobufField(3, Handler = typeof(Serialization.DefaultHandler.BoolCollectionHandler<List<bool>>))]
-    public List<bool>? ListBool { get; set; }
+    [ProtobufField(3, Handler = typeof(BoolCollectionHandler<List<bool>>))]
+    public List<bool> ListBool { get; set; }
 
+    [ProtobufField(555)]
+    public IDisposable Dsp { get; set; }
+
+    [ProtobufRemainingFields]
     private readonly ProtobufMessage remaingFields = new();
 
     public void ReadProtobuf<TReader>(scoped ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options)
         where TReader : struct, IStructBinaryReader<TReader>, allows ref struct
     {
-        if (!IsFieldInfoValidForInstance(fieldInfo, options))
+        if (!this.IsFieldInfoValidForInstance(fieldInfo, options))
             throw new InvalidDataException();
         TReader subReader = TReader.CreateLengthDelimitedReader(ref reader);
+        int field_1_v = default;
+        bool field_1_e = false;
+        int field_2_v = default;
+        bool field_2_e = false;
+        MyBoolList? field_3_v = default;
+        bool field_3_e = false;
+        ProtobufString? field_4_v = default;
+        bool field_4_e = false;
+        IDisposable? field_555_v = default;
+        bool field_555_e = false;
         try
         {
             ParseStatus subStatus;
@@ -88,70 +108,88 @@ partial class ExampleMessage : IProtobufType<ExampleMessage>
                 switch (fi.Number)
                 {
                     case 1:
-                        fi.FieldTypeHint = (FieldType)0;
-                        fi.CustomAttribute = 0;
+                        field_1_v = subReader.ReadVarInt<int>();
+                        field_1_e = true;
                         break;
                     case 2:
-                        fi.FieldTypeHint = (FieldType)0;
-                        fi.CustomAttribute = 0;
+                        field_2_v = subReader.ReadVarInt<int>();
+                        field_2_e = true;
                         break;
                     case 3:
-                        fi.FieldTypeHint = (FieldType)0;
+                        fi.FieldTypeHint = (FieldTypeHint)0;
                         fi.CustomAttribute = 0;
+                        SerializationHelper.StructBinaryReader<TReader>.Class<List<bool>>.ReadField<BoolCollectionHandler<List<bool>>, BoolCollectionHandler<List<bool>>>(ref subReader, field_3_v, ref field_3_e, fi, options);
                         break;
                     case 4:
-                        fi.FieldTypeHint = (FieldType)0;
+                        fi.FieldTypeHint = (FieldTypeHint)0;
                         fi.CustomAttribute = 0;
+                        SerializationHelper.StructBinaryReader<TReader>.ClassCreatableReadOnly<ProtobufString>.ReadField(ref subReader, field_4_v, ref field_4_e, fi, options);
                         break;
-
+                    default:
+                        fi.FieldTypeHint = (FieldTypeHint)(0);
+                        fi.CustomAttribute = 0;
+                        remaingFields.AddProtobufField(ref subReader, fi, options);
+                        break;
                 }
             }
             if (subStatus != ParseStatus.ExactEndOfStream)
+            {
+                // if (field_1_e)
+                //     ProtobufUtility.DisposeHelper(ref field_1_v);
+                // if (field_3_e)
+                //     ((IDisposable)field_3_v).Dispose();
                 throw new InvalidDataException();
+            }
+            TestValField = field_1_v;
+            //TestValProp = field_2_v;
+            ListBool = field_3_v!;
+            TestValPropNW = field_4_v!;
+        }
+        catch (Exception ex)
+        {
+            List<Exception> exceptions = [ex];
+            SerializationHelper.Dispose(field_555_v, exceptions);
+            if (exceptions.Count < 2)
+                throw;
+            throw new AggregateException(exceptions);
         }
         finally
         {
             subReader.Dispose();
         }
-        remaingFields.ReadProtobufBody(ref reader, options);
-        throw new NotImplementedException();
     }
 
-    public void ReadProtobuf<TReader>(TReader reader, FieldInfo fieldInfo, SerializationOptions? options)
-        where TReader : class, IClassBinaryReader<TReader>
-    {
-        throw new NotImplementedException();
-    }
-
-
-
-
-
-    public static bool IsFieldInfoValid(FieldInfo fieldInfo, SerializationOptions? options)
-    {
-        throw new NotImplementedException();
-    }
     public bool IsFieldInfoValidForInstance(FieldInfo fieldInfo, SerializationOptions? options)
     {
         throw new NotImplementedException();
     }
 
-    public bool TryReadProtobuf<TReader>(scoped ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status) where TReader : struct, IStructBinaryReader<TReader>, allows ref struct
+    static bool ICreatableProtobufType<ExampleMessage>.IsFieldInfoValid(FieldInfo fieldInfo, SerializationOptions? options)
     {
         throw new NotImplementedException();
     }
 
-    public void WriteProtobuf<TWriter>(scoped ref TWriter writer, FieldInfo fieldInfo, SerializationOptions? options) where TWriter : struct, IStructBinaryWriter<TWriter>, allows ref struct
+    bool IReadOnlyProtobufType.TryReadProtobuf<TReader>(scoped ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
     {
         throw new NotImplementedException();
     }
 
-    bool IReadOnlyProtobufType<ExampleMessage>.TryReadProtobuf<TReader>(TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
+    bool IReadOnlyProtobufType.TryReadProtobuf<TReader>(TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
     {
         throw new NotImplementedException();
     }
 
-    void IWriteOnlyProtobufType<ExampleMessage>.WriteProtobuf<TWriter>(TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)
+    void IReadOnlyProtobufType.ReadProtobuf<TReader>(TReader reader, FieldInfo fieldInfo, SerializationOptions? options)
+    {
+        throw new NotImplementedException();
+    }
+
+    void IWriteOnlyProtobufType.WriteProtobuf<TWriter>(scoped ref TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)
+    {
+        throw new NotImplementedException();
+    }
+
+    void IWriteOnlyProtobufType.WriteProtobuf<TWriter>(TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)
     {
         throw new NotImplementedException();
     }

@@ -1,60 +1,59 @@
 ﻿namespace Myitian.LiteProtobuf.Serialization;
 
 /// <summary>
-/// Indicates the field type. May not be read by some serializers.
-/// <list type="bullet">
-/// <item>Bit 5~4: Repeated encoding preference</item>
-/// <item>Bit 3: Whether it is a repeated field</item>
-/// <item>Bit 2~0: Basic field type</item>
-/// </list>
+/// Indicates the field type. Some serializers may not read or follow this instruction.
+/// <para>Bit layout, LSB=0:<list type="bullet">
+/// <item>Bit 0~2: Basic field type preference</item>
+/// <item>Bit 3~4: Repeated preference</item>
+/// <item>Bit 5~6: Repeated encoding preference</item>
+/// </list></para>
 /// </summary>
 [Flags]
-public enum FieldType
+public enum FieldTypeHint
 {
     Auto,
-    Variant, // There are no variations for Auto and LengthDelimited
 
     VarInt = 0b_000_010,
-    VarIntZigZag = VarInt | Variant,
+    VarIntZigZag = VarInt | 1,
 
     Fixed32 = 0b_000_100,
-    Fixed64 = Fixed32 | Variant,
+    Fixed64 = Fixed32 | 1,
 
     LengthDelimited = 0b_000_110,
 
-    Repeated = 0b_001_000,
-    Packed = 0b_010_000,
-    NonPacked = 0b_100_000,
-
-    RepeatedVarInt = Repeated | VarInt,
-    RepeatedVarIntZigZag = Repeated | VarIntZigZag,
-    RepeatedFixed32 = Repeated | Fixed32,
-    RepeatedFixed64 = Repeated | Fixed64,
-    RepeatedLengthDelimited = Repeated | LengthDelimited,
+    Repeated = 0b_00_01_000,
+    NonRepeated = 0b_00_10_000,
+    Packed = 0b_01_00_000,
+    NonPacked = 0b_10_00_000
 }
 public static class FieldTypeExtension
 {
-    public static bool IsRepeated(this FieldType type)
-        => (type & FieldType.Repeated) != 0;
-    public static RepeatedEncoding GetRepeatedEncoding(this FieldType type)
-        => (type & (FieldType.Packed | FieldType.NonPacked)) switch
+    extension(FieldTypeHint type)
+    {
+        public bool? IsRepeated => (type & (FieldTypeHint.Repeated | FieldTypeHint.NonRepeated)) switch
         {
-            FieldType.Packed => RepeatedEncoding.Packed,
-            FieldType.NonPacked => RepeatedEncoding.NonPacked,
-            _ => RepeatedEncoding.Auto,
+            FieldTypeHint.Repeated => true,
+            FieldTypeHint.NonRepeated => false,
+            _ => null,
         };
-    public static WireType? GetWireType(this FieldType type)
-        => (type & (FieldType)0b111) switch
+        public bool? IsPacked => (type & (FieldTypeHint.Packed | FieldTypeHint.NonPacked)) switch
         {
-            // 0, 1
-            FieldType.Auto or FieldType.Variant => null,
+            FieldTypeHint.Packed => true,
+            FieldTypeHint.NonPacked => false,
+            _ => null,
+        };
+        public WireType? AsWireType => (type & (FieldTypeHint)0b111) switch
+        {
             // 2, 3
-            FieldType.VarInt or FieldType.VarIntZigZag => WireType.VarInt,
+            FieldTypeHint.VarInt or FieldTypeHint.VarIntZigZag => WireType.VarInt,
             // 4
-            FieldType.Fixed32 => WireType.Fixed32,
+            FieldTypeHint.Fixed32 => WireType.Fixed32,
             // 5
-            FieldType.Fixed64 => WireType.Fixed64,
-            // 6, 7
-            _ => WireType.LengthDelimited
+            FieldTypeHint.Fixed64 => WireType.Fixed64,
+            // 6
+            FieldTypeHint.LengthDelimited => WireType.LengthDelimited,
+            // 0, 1, 7
+            _ => null,
         };
+    }
 }

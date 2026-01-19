@@ -9,7 +9,7 @@ public struct FieldInfo
     /// <summary>
     /// Indicates the field type. May not be read by some serializers.
     /// </summary>
-    public FieldType FieldTypeHint;
+    public FieldTypeHint FieldTypeHint;
     /// <summary>
     /// Only used during deserialization.
     /// </summary>

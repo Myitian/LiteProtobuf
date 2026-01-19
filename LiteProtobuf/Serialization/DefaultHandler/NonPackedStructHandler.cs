@@ -3,17 +3,16 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Myitian.LiteProtobuf.Serialization.DefaultHandler;
 
-public sealed class NonPackedStructCollectionHandler<T, TCollection, THandler>
-    : IClassProtobufTypeHandler<TCollection>
+public sealed class NonPackedStructCollectionHandler<T, TCollection, THandler> : IClassProtobufTypeHandler<TCollection>
     where TCollection : class, ICollection<T>, new()
-    where THandler : IStructProtobufTypeHandler<T>
+    where THandler : IProtobufTypeFactory<T>, IStructProtobufTypeWriteOnlyHandler<T>
     where T : struct
 {
     public static bool IsFieldInfoValid(FieldInfo fieldInfo, SerializationOptions? options)
     {
         return THandler.IsFieldInfoValid(fieldInfo, options);
     }
-    public static bool IsFieldInfoValidForInstance(in TCollection value, FieldInfo fieldInfo, SerializationOptions? options)
+    public static bool IsFieldInfoValidForInstance(TCollection value, FieldInfo fieldInfo, SerializationOptions? options)
     {
         return THandler.IsFieldInfoValid(fieldInfo, options);
     }
@@ -28,22 +27,22 @@ public sealed class NonPackedStructCollectionHandler<T, TCollection, THandler>
     public static bool TryCreateFulfilled<TReader>(scoped ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options, [NotNullWhen(true)] out TCollection? value, out ParseStatus status)
         where TReader : struct, IStructBinaryReader<TReader>, allows ref struct
     {
-        return ClassProtobufTypeHandler.TryCreateFulfilled<TCollection, NonPackedStructCollectionHandler<T, TCollection, THandler>, TReader>(ref reader, fieldInfo, options, out value, out status);
+        return ClassProtobufTypeHandler.TryCreateFulfilled<TReader, TCollection, NonPackedStructCollectionHandler<T, TCollection, THandler>>(ref reader, fieldInfo, options, out value, out status);
     }
     public static bool TryCreateFulfilled<TReader>(TReader reader, FieldInfo fieldInfo, SerializationOptions? options, [NotNullWhen(true)] out TCollection? value, out ParseStatus status)
          where TReader : class, IClassBinaryReader<TReader>
     {
-        return ClassProtobufTypeHandler.TryCreateFulfilled<TCollection, NonPackedStructCollectionHandler<T, TCollection, THandler>, TReader>(reader, fieldInfo, options, out value, out status);
+        return ClassProtobufTypeHandler.TryCreateFulfilled<TReader, TCollection, NonPackedStructCollectionHandler<T, TCollection, THandler>>(reader, fieldInfo, options, out value, out status);
     }
     public static TCollection CreateFulfilled<TReader>(scoped ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options)
         where TReader : struct, IStructBinaryReader<TReader>, allows ref struct
     {
-        return ClassProtobufTypeHandler.CreateFulfilled<TCollection, NonPackedStructCollectionHandler<T, TCollection, THandler>, TReader>(ref reader, fieldInfo, options);
+        return ClassProtobufTypeHandler.CreateFulfilled<TReader, TCollection, NonPackedStructCollectionHandler<T, TCollection, THandler>>(ref reader, fieldInfo, options);
     }
     public static TCollection CreateFulfilled<TReader>(TReader reader, FieldInfo fieldInfo, SerializationOptions? options)
          where TReader : class, IClassBinaryReader<TReader>
     {
-        return ClassProtobufTypeHandler.CreateFulfilled<TCollection, NonPackedStructCollectionHandler<T, TCollection, THandler>, TReader>(reader, fieldInfo, options);
+        return ClassProtobufTypeHandler.CreateFulfilled<TReader, TCollection, NonPackedStructCollectionHandler<T, TCollection, THandler>>(reader, fieldInfo, options);
     }
     public static bool TryReadProtobuf<TReader>(TCollection self, scoped ref TReader reader, FieldInfo fieldInfo, SerializationOptions? options, out ParseStatus status)
         where TReader : struct, IStructBinaryReader<TReader>, allows ref struct
@@ -86,8 +85,7 @@ public sealed class NonPackedStructCollectionHandler<T, TCollection, THandler>
             THandler.WriteProtobuf(value, writer, fieldInfo, options);
     }
 }
-public sealed class NonPackedStructCollectionReadOnlyHandler<T, THandler>
-    : IReadOnlyClassProtobufTypeHandler<ICollection<T>>
+public sealed class NonPackedStructCollectionReadOnlyHandler<T, THandler> : IClassProtobufTypeReadOnlyHandler<ICollection<T>>
     where THandler : IProtobufTypeFactory<T>
     where T : class
 {
@@ -95,7 +93,7 @@ public sealed class NonPackedStructCollectionReadOnlyHandler<T, THandler>
     {
         return THandler.IsFieldInfoValid(fieldInfo, options);
     }
-    public static bool IsFieldInfoValidForInstance(in ICollection<T> value, FieldInfo fieldInfo, SerializationOptions? options)
+    public static bool IsFieldInfoValidForInstance(ICollection<T> value, FieldInfo fieldInfo, SerializationOptions? options)
     {
         return THandler.IsFieldInfoValid(fieldInfo, options);
     }
@@ -128,9 +126,8 @@ public sealed class NonPackedStructCollectionReadOnlyHandler<T, THandler>
         self.Add(value);
     }
 }
-public sealed class NonPackedStructEnumerableWriteOnlyHandler<T, THandler>
-    : IWriteOnlyClassProtobufTypeHandler<IEnumerable<T>>
-    where THandler : IWriteOnlyStructProtobufTypeHandler<T>
+public sealed class NonPackedStructEnumerableWriteOnlyHandler<T, THandler> : IClassProtobufTypeWriteOnlyHandler<IEnumerable<T>>
+    where THandler : IStructProtobufTypeWriteOnlyHandler<T>
     where T : struct
 {
     public static void WriteProtobuf<TWriter>(IEnumerable<T> self, scoped ref TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)
@@ -146,9 +143,8 @@ public sealed class NonPackedStructEnumerableWriteOnlyHandler<T, THandler>
             THandler.WriteProtobuf(value, writer, fieldInfo, options);
     }
 }
-public sealed class NonPackedStructReadOnlySpanWriteOnlyHandler<T, THandler>
-    : IWriteOnlyStructProtobufTypeHandler<ReadOnlySpan<T>>
-    where THandler : IWriteOnlyStructProtobufTypeHandler<T>
+public sealed class NonPackedStructReadOnlySpanWriteOnlyHandler<T, THandler> : IStructProtobufTypeWriteOnlyHandler<ReadOnlySpan<T>>
+    where THandler : IStructProtobufTypeWriteOnlyHandler<T>
     where T : struct
 {
     public static void WriteProtobuf<TWriter>(in ReadOnlySpan<T> self, scoped ref TWriter writer, FieldInfo fieldInfo, SerializationOptions? options)

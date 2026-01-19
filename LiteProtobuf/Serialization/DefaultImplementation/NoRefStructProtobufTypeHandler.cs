@@ -2,19 +2,18 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Myitian.LiteProtobuf.Serialization.DefaultImplementation;
 
-public static class NoRefStructProtobufTypeHandler<T>
-    where T : struct
+public static class NoRefStructProtobufTypeHandler
 {
-    public static bool TryCreateFulfilled<THandler, TReader>(
+    public static bool TryCreateFulfilled<TReader, T, THandler>(
         scoped ref TReader reader,
         FieldInfo fieldInfo,
         SerializationOptions? options,
         [NotNullWhen(true)] out T value,
         out ParseStatus status)
-        where THandler : IProtobufTypeFactory<T>, IReadOnlyStructProtobufTypeHandler<T>, allows ref struct
+        where THandler : IProtobufTypeFactory<T>, IStructProtobufTypeReadOnlyHandler<T>, allows ref struct
         where TReader : struct, IStructBinaryReader<TReader>, allows ref struct
     {
-        if (!THandler.TryCreateInstance(fieldInfo, options, out value))
+        if (!THandler.TryCreateInstance(fieldInfo, options, out value!))
         {
             status = ParseStatus.InvalidData;
             return false;

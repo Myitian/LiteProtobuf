@@ -1,6 +1,6 @@
 namespace Myitian.LiteProtobuf.CompileTimeSourceGeneration.Templates;
 
-partial class Repeated
+partial class RepeatedUtility
 {
     partial class Write
     {
@@ -17,36 +17,34 @@ partial class Repeated
 
             public string Keyword => nameof(VarInt);
             public string ReadOnlySpan => """
-                switch (repeatedEncoding)
+                switch (isPacked)
                 {{
-                    case RepeatedEncoding.Auto:
+                    case null:
                 """;
             public string IEnumerable => """
-                switch (repeatedEncoding)
+                switch (isPacked)
                 {{
-                    case RepeatedEncoding.Auto:
+                    case null:
                         if (value is ICollection<{2}> or IReadOnlyCollection<{2}>)
-                            goto case RepeatedEncoding.Packed;
+                            goto case true;
                         else
-                            goto case RepeatedEncoding.NonPacked;
+                            goto case false;
                 """;
             public string Body => """
-                    case RepeatedEncoding.Packed:
-                        long totalSize = Count{1}Size(value);
+                    case true:
+                        long totalSize = ProtobufUtility.Count{1}Size(value);
                         writer.WriteTag(number, WireType.LengthDelimited);
                         writer.WriteVarInt(totalSize);
                         foreach ({2} it in value)
                             writer.Write{1}(it);
                         break;
-                    case RepeatedEncoding.NonPacked:
+                    case false:
                         foreach ({2} it in value)
                         {{
                             writer.WriteTag(number, WireType.{0});
                             writer.Write{1}(it);
                         }}
                         break;
-                    default:
-                        throw new ArgumentException($"Invalid value: {{repeatedEncoding}}", nameof(repeatedEncoding));
                 }}
                 """;
         }
@@ -56,30 +54,30 @@ partial class Repeated
 
             public string Keyword => nameof(Fixed);
             public string ReadOnlySpan => """
-                switch (repeatedEncoding)
+                switch (isPacked)
                 {{
-                    case RepeatedEncoding.Auto:
-                    case RepeatedEncoding.Packed:
+                    case null:
+                    case true:
                         long totalSize = value.Length * ({4}L / 8);
                 """;
             public string IEnumerable => """
                 int count = -1;
-                switch (repeatedEncoding)
+                switch (isPacked)
                 {{
-                    case RepeatedEncoding.Auto:
+                    case null:
                         if (value.TryGetNonEnumeratedCount(out count))
-                            goto case RepeatedEncoding.Packed;
+                            goto case true;
                         else if (value is not IReadOnlyCollection<{2}> ro)
-                            goto case RepeatedEncoding.NonPacked;
+                            goto case false;
                         else
                         {{
                             count = ro.Count;
-                            goto case RepeatedEncoding.Packed;
+                            goto case true;
                         }}
-                    case RepeatedEncoding.Packed when count < 0:
+                    case true when count < 0:
                         count = value.Count();
-                        goto case RepeatedEncoding.Packed;
-                    case RepeatedEncoding.Packed:
+                        goto case true;
+                    case true:
                         long totalSize = count * ({4}L / 8);
                 """;
             public string Body => """
@@ -88,15 +86,13 @@ partial class Repeated
                         foreach ({2} it in value)
                             writer.Write{1}(it);
                         break;
-                    case RepeatedEncoding.NonPacked:
+                    case false:
                         foreach ({2} it in value)
                         {{
                             writer.WriteTag(number, WireType.{0});
                             writer.Write{1}(it);
                         }}
                         break;
-                    default:
-                        throw new ArgumentException($"Invalid value: {{repeatedEncoding}}", nameof(repeatedEncoding));
                 }}
                 """;
         }
@@ -107,45 +103,43 @@ partial class Repeated
             public string Keyword => nameof(Bool);
             public string ReadOnlySpan => """
                 int count = value.Length;
-                switch (repeatedEncoding)
+                switch (isPacked)
                 {{
-                    case RepeatedEncoding.Auto:
+                    case null:
                 """;
             public string IEnumerable => """
                 int count = -1;
-                switch (repeatedEncoding)
+                switch (isPacked)
                 {{
-                    case RepeatedEncoding.Auto:
+                    case null:
                         if (value.TryGetNonEnumeratedCount(out count))
-                            goto case RepeatedEncoding.Packed;
+                            goto case true;
                         else if (value is not IReadOnlyCollection<{2}> ro)
-                            goto case RepeatedEncoding.NonPacked;
+                            goto case false;
                         else
                         {{
                             count = ro.Count;
-                            goto case RepeatedEncoding.Packed;
+                            goto case true;
                         }}
-                    case RepeatedEncoding.Packed when count < 0:
+                    case true when count < 0:
                         count = value.Count();
-                        goto case RepeatedEncoding.Packed;
+                        goto case true;
                 
                 """;
             public string Body => """
-                    case RepeatedEncoding.Packed:
+                    case true:
                         writer.WriteTag(number, WireType.LengthDelimited);
                         writer.WriteVarInt(count);
                         foreach ({2} it in value)
                             writer.Write{1}(it);
                         break;
-                    case RepeatedEncoding.NonPacked:
+                    case false:
                         foreach ({2} it in value)
                         {{
                             writer.WriteTag(number, WireType.{0});
                             writer.Write{1}(it);
                         }}
                         break;
-                    default:
-                        throw new ArgumentException($"Invalid value: {{repeatedEncoding}}", nameof(repeatedEncoding));
                 }}
                 """;
         }

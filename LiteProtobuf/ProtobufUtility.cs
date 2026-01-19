@@ -9,68 +9,95 @@ public static partial class ProtobufUtility
 {
     public static readonly Encoding DefaultEncoding = new UTF8Encoding(false, true);
 
-    public static void WriteTag<TWriter>(this scoped ref TWriter writer, int number, WireType wireType)
+    extension<TReader>(scoped ref TReader reader)
+        where TReader : struct, IBinaryReader, allows ref struct
+    {
+        public void ReadTag(out int number, out WireType wireType)
+        {
+            long id = reader.ReadVarInt<long>();
+            number = (int)(id >> 3);
+            wireType = (WireType)(id & 0b111);
+        }
+        public bool TryReadTag(out int number, out WireType wireType, out ParseStatus status)
+        {
+            if (reader.TryReadVarInt(out long id, out status))
+            {
+                number = (int)(id >> 3);
+                wireType = (WireType)(id & 0b111);
+                return true;
+            }
+            number = default;
+            wireType = default;
+            return false;
+        }
+        public bool TryReadTag(out FieldInfo fieldInfo, out ParseStatus status)
+        {
+            if (reader.TryReadVarInt(out long id, out status))
+            {
+                fieldInfo = new()
+                {
+                    Number = (int)(id >> 3),
+                    ReceivedWireType = (WireType)(id & 0b111)
+                };
+                return true;
+            }
+            fieldInfo = default;
+            return false;
+        }
+    }
+    extension<TReader>(TReader reader)
+        where TReader : class, IBinaryReader
+    {
+        public void ReadTag(out int number, out WireType wireType)
+        {
+            long id = reader.ReadVarInt<long>();
+            number = (int)(id >> 3);
+            wireType = (WireType)(id & 0b111);
+        }
+        public bool TryReadTag(out int number, out WireType wireType, out ParseStatus status)
+        {
+            if (reader.TryReadVarInt(out long id, out status))
+            {
+                number = (int)(id >> 3);
+                wireType = (WireType)(id & 0b111);
+                return true;
+            }
+            number = default;
+            wireType = default;
+            return false;
+        }
+        public bool TryReadTag(out FieldInfo fieldInfo, out ParseStatus status)
+        {
+            if (reader.TryReadVarInt(out long id, out status))
+            {
+                fieldInfo = new()
+                {
+                    Number = (int)(id >> 3),
+                    ReceivedWireType = (WireType)(id & 0b111)
+                };
+                return true;
+            }
+            fieldInfo = default;
+            return false;
+        }
+    }
+    extension<TWriter>(scoped ref TWriter writer)
         where TWriter : struct, IBinaryWriter, allows ref struct
     {
-        writer.WriteVarInt(((long)number << 3) | (long)wireType);
+        public void WriteTag(int number, WireType wireType)
+        {
+            writer.WriteVarInt(((long)number << 3) | (long)wireType);
+        }
     }
-    public static void WriteTag<TWriter>(this TWriter writer, int number, WireType wireType)
+    extension<TWriter>(TWriter writer)
         where TWriter : class, IBinaryWriter
     {
-        writer.WriteVarInt(((long)number << 3) | (long)wireType);
-    }
-    public static void ReadTag<TReader>(this scoped ref TReader reader, out int number, out WireType wireType)
-        where TReader : struct, IBinaryReader, allows ref struct
-    {
-        long id = reader.ReadVarInt<long>();
-        number = (int)(id >> 3);
-        wireType = (WireType)(id & 0b111);
-    }
-    public static void ReadTag<TReader>(this TReader reader, out int number, out WireType wireType)
-        where TReader : class, IBinaryReader
-    {
-        long id = reader.ReadVarInt<long>();
-        number = (int)(id >> 3);
-        wireType = (WireType)(id & 0b111);
-    }
-    public static bool TryReadTag<TReader>(this scoped ref TReader reader, out int number, out WireType wireType, out ParseStatus status)
-        where TReader : struct, IBinaryReader, allows ref struct
-    {
-        if (reader.TryReadVarInt(out long id, out status))
+        public void WriteTag(int number, WireType wireType)
         {
-            number = (int)(id >> 3);
-            wireType = (WireType)(id & 0b111);
-            return true;
+            writer.WriteVarInt(((long)number << 3) | (long)wireType);
         }
-        number = default;
-        wireType = default;
-        return false;
     }
-    public static bool TryReadTag<TReader>(this scoped ref TReader reader, out FieldInfo fieldInfo, out ParseStatus status)
-        where TReader : struct, IBinaryReader, allows ref struct
-    {
-        fieldInfo = new();
-        return reader.TryReadTag(out fieldInfo.Number, out fieldInfo.ReceivedWireType, out status);
-    }
-    public static bool TryReadTag<TReader>(this TReader reader, out int number, out WireType wireType, out ParseStatus status)
-        where TReader : class, IBinaryReader
-    {
-        if (reader.TryReadVarInt(out long id, out status))
-        {
-            number = (int)(id >> 3);
-            wireType = (WireType)(id & 0b111);
-            return true;
-        }
-        number = default;
-        wireType = default;
-        return false;
-    }
-    public static bool TryReadTag<TReader>(this TReader reader, out FieldInfo fieldInfo, out ParseStatus status)
-        where TReader : class, IBinaryReader
-    {
-        fieldInfo = new();
-        return reader.TryReadTag(out fieldInfo.Number, out fieldInfo.ReceivedWireType, out status);
-    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static T EncodeZigZag<T>(T value)
         where T : IBinaryInteger<T>, ISignedNumber<T>
@@ -107,12 +134,20 @@ public static partial class ProtobufUtility
             result += CountVarIntSize(it);
         return result;
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int CountVarIntZigZagSize<T>(T value)
+        where T : IBinaryInteger<T>, ISignedNumber<T>
+    {
+        if (T.IsZero(value))
+            return 1;
+        return CountVarIntSize(EncodeZigZag(value));
+    }
     public static long CountVarIntZigZagSize<T>(ReadOnlySpan<T> value)
         where T : IBinaryInteger<T>, ISignedNumber<T>
     {
         long result = 0;
         foreach (T it in value)
-            result += CountVarIntSize(EncodeZigZag(it));
+            result += CountVarIntZigZagSize(it);
         return result;
     }
     public static long CountVarIntZigZagSize<T>(IEnumerable<T> value)
@@ -120,20 +155,7 @@ public static partial class ProtobufUtility
     {
         long result = 0;
         foreach (T it in value)
-            result += CountVarIntSize(EncodeZigZag(it));
+            result += CountVarIntZigZagSize(it);
         return result;
-    }
-
-    public static void ReadClassField<THandler, TReader, T>(ref TReader subReader, FieldInfo fi, SerializationOptions? options, ref T? value, ref bool existed)
-        where THandler : IClassProtobufTypeHandler<T>
-        where TReader : struct, IStructBinaryReader<TReader>, allows ref struct
-        where T : class
-    {
-        if (!existed)
-        {
-            value = THandler.CreateInstance(fi, options);
-            existed = true;
-        }
-        THandler.ReadProtobuf(value!, ref subReader, fi, options);
     }
 }

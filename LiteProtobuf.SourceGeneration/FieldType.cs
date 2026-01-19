@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Myitian.LiteProtobuf.SourceGeneration;
+﻿namespace Myitian.LiteProtobuf.SourceGeneration;
 
 public enum RepeatedInfo : byte
 {
@@ -38,19 +36,18 @@ public readonly record struct FieldType
         RepeatedInfo = info;
         BasicFieldType = type;
     }
-    public FieldType(object value) : this(RepeatedInfo.NonRepeated, BasicFieldType.Auto)
+    public FieldType(int value) : this(RepeatedInfo.NonRepeated, BasicFieldType.Auto)
     {
-        int v = (int)Convert.ToInt64(value);
-        if ((v & Repeated) != 0)
+        if ((value & Repeated) != 0)
         {
-            RepeatedInfo = (v & (Packed | NonPacked)) switch
+            RepeatedInfo = (value & (Packed | NonPacked)) switch
             {
                 Packed => RepeatedInfo.Packed,
                 NonPacked => RepeatedInfo.NonPacked,
                 _ => RepeatedInfo.Auto
             };
         }
-        BasicFieldType = (v & 0b111) switch
+        BasicFieldType = (value & 0b111) switch
         {
             // 0, 1
             Auto or Variant => BasicFieldType.Auto,
